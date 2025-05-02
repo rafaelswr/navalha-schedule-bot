@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -7,6 +6,7 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { ChatBot } from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
 import { Scissors } from "lucide-react";
+import { FeaturedProducts } from "@/components/FeaturedProducts";
 
 const Index = () => {
   const services = [
@@ -67,6 +67,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
+      {/* Carrossel de Produtos */}
+      <FeaturedProducts />
       
       {/* Por que escolher-nos */}
       <section className="py-16">
