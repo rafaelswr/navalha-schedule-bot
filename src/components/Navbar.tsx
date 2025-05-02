@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Navbar = () => {
@@ -23,6 +23,9 @@ export const Navbar = () => {
           </Link>
           <Link to="/servicos" className="hover:text-navalha-gold transition-colors">
             Serviços
+          </Link>
+          <Link to="/loja" className="hover:text-navalha-gold transition-colors">
+            Loja
           </Link>
           <Link to="/agendamento" className="hover:text-navalha-gold transition-colors">
             Agendamento
@@ -63,6 +66,13 @@ export const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Serviços
+            </Link>
+            <Link 
+              to="/loja" 
+              className="hover:text-navalha-gold transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Loja
             </Link>
             <Link 
               to="/agendamento" 
