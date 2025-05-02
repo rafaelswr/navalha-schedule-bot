@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 interface GoogleMapProps {
   initialLat: number;
   initialLng: number;
-  onLocationChange?: (lat: number, lng: number) => void;
+  onLocationChange?: ((lat: number, lng: number) => void) | null;
 }
 
 declare global {
@@ -67,6 +67,15 @@ export const GoogleMap = ({ initialLat, initialLng, onLocationChange }: GoogleMa
       window.initMap();
     }
   }, [initialLat, initialLng, onLocationChange]);
+
+  // Update marker position when coordinates change
+  useEffect(() => {
+    if (marker && map) {
+      const newPosition = { lat: initialLat, lng: initialLng };
+      marker.setPosition(newPosition);
+      map.panTo(newPosition);
+    }
+  }, [initialLat, initialLng, marker, map]);
 
   return <div ref={mapRef} style={{ width: '100%', height: '100%' }} />;
 };

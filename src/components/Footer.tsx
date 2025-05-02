@@ -1,7 +1,8 @@
 
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter, MapPin } from "lucide-react";
 import { useCompanyStore } from "@/store/companyStore";
+import { GoogleMap } from "@/components/GoogleMap";
 
 export const Footer = () => {
   const { info } = useCompanyStore();
@@ -55,8 +56,8 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/contactos" className="text-gray-300 hover:text-navalha-gold transition-colors">
-                  Contactos
+                <Link to="/loja" className="text-gray-300 hover:text-navalha-gold transition-colors">
+                  Loja
                 </Link>
               </li>
             </ul>
@@ -64,11 +65,22 @@ export const Footer = () => {
 
           <div>
             <h3 className="text-navalha-gold text-xl font-semibold mb-4">Contacto</h3>
-            <p className="text-gray-300 mb-2">{info.address}</p>
+            <p className="text-gray-300 mb-2">
+              <MapPin size={16} className="inline mr-1" /> {info.address}
+            </p>
             <p className="text-gray-300 mb-2">{info.city}, {info.country}</p>
             <p className="text-gray-300 mb-2">Tel: {info.phone}</p>
-            <p className="text-gray-300">Email: {info.email}</p>
+            <p className="text-gray-300 mb-4">Email: {info.email}</p>
           </div>
+        </div>
+
+        {/* Google Map Section */}
+        <div className="mt-8 rounded-lg overflow-hidden h-64 w-full">
+          <GoogleMap 
+            initialLat={info.location.lat} 
+            initialLng={info.location.lng} 
+            onLocationChange={null}
+          />
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
