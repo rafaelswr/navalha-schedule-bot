@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { EmblaCarouselType } from "embla-carousel-react";
 
 export const FeaturedProducts = () => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -70,11 +72,10 @@ export const FeaturedProducts = () => {
               loop: true,
             }}
             className="w-full"
-            onSelect={(api) => {
-              if (api && typeof api !== 'object' && typeof api.selectedScrollSnap === 'function') {
+            onSelect={(api: EmblaCarouselType) => {
+              if (api && api.selectedScrollSnap) {
                 // Get the current index from the API and use it to update state
-                const selectedIndex = api.selectedScrollSnap();
-                setCurrentPage(selectedIndex);
+                setCurrentPage(api.selectedScrollSnap());
               }
             }}
           >
