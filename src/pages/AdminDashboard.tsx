@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Scissors, Calendar, UsersIcon, LogOut } from "lucide-react";
+import { Scissors, Calendar, UsersIcon, LogOut, Store, FileText } from "lucide-react";
 
 // Mock data for the dashboard
 const dailyData = [
@@ -123,6 +123,39 @@ const AdminDashboard = () => {
               <div className="text-xs text-muted-foreground">
                 78% taxa de retorno
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Admin Navigation Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate("/admin/services")}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <FileText className="h-6 w-6 text-navalha-burgundy" />
+                <CardTitle>Gestão de Serviços</CardTitle>
+              </div>
+              <CardDescription>
+                Adicione, edite ou remova serviços da barbearia
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Gira os serviços exibidos na página principal e na página de serviços.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate("/admin/products")}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Store className="h-6 w-6 text-navalha-burgundy" />
+                <CardTitle>Gestão de Produtos</CardTitle>
+              </div>
+              <CardDescription>
+                Adicione, edite ou remova produtos da loja online
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Gira os produtos disponíveis na loja online do Clube da Navalha.</p>
             </CardContent>
           </Card>
         </div>

@@ -12,6 +12,8 @@ import NotFound from "./pages/NotFound";
 import Loja from "./pages/Loja";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminServices from "./pages/AdminServices";
+import AdminProducts from "./pages/AdminProducts";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/loja" element={<Loja />} />
           <Route path="/barbalogin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/services" element={<AdminServices />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
