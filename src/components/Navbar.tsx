@@ -1,0 +1,89 @@
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
+import { Link } from "react-router-dom";
+
+export const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <header className="bg-navalha-black text-white py-4 px-6 sticky top-0 z-50 shadow-md">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center">
+            <span className="text-navalha-gold font-bold text-2xl">Clube da Navalha</span>
+          </Link>
+        </div>
+
+        {/* Menu Desktop */}
+        <nav className="hidden md:flex items-center space-x-8">
+          <Link to="/" className="hover:text-navalha-gold transition-colors">
+            Início
+          </Link>
+          <Link to="/servicos" className="hover:text-navalha-gold transition-colors">
+            Serviços
+          </Link>
+          <Link to="/agendamento" className="hover:text-navalha-gold transition-colors">
+            Agendamento
+          </Link>
+          <Link to="/contactos" className="hover:text-navalha-gold transition-colors">
+            Contactos
+          </Link>
+          <Button className="bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white transition-colors">
+            Marcar Agora
+          </Button>
+        </nav>
+
+        {/* Menu Mobile Button */}
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="md:hidden text-white"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          <Menu size={24} />
+        </Button>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <nav className="md:hidden bg-navalha-gray mt-2 py-4">
+          <div className="container mx-auto flex flex-col space-y-4 px-6">
+            <Link 
+              to="/" 
+              className="hover:text-navalha-gold transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Início
+            </Link>
+            <Link 
+              to="/servicos" 
+              className="hover:text-navalha-gold transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Serviços
+            </Link>
+            <Link 
+              to="/agendamento" 
+              className="hover:text-navalha-gold transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Agendamento
+            </Link>
+            <Link 
+              to="/contactos" 
+              className="hover:text-navalha-gold transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contactos
+            </Link>
+            <Button className="bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white transition-colors w-full">
+              Marcar Agora
+            </Button>
+          </div>
+        </nav>
+      )}
+    </header>
+  );
+};

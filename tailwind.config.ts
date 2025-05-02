@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Cores personalizadas para o Clube da Navalha
+				navalha: {
+					black: '#111111',
+					gold: '#D4AF37',
+					burgundy: '#800020',
+					gray: '#2A2A2A',
+					light: '#F5F5F5'
 				}
 			},
 			borderRadius: {
