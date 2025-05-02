@@ -145,7 +145,7 @@ const AdminDashboard = () => {
                   Distribuição de serviços por dia da semana
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[700px]"> {/* Decreased height from 350px to 300px */}
+              <CardContent className="h-[750px]"> {/* Decreased height from 350px to 300px */}
                 <ChartContainer
                   config={{
                     corte: { label: "Cortes", color: "#9b87f5" },
