@@ -138,14 +138,14 @@ const AdminDashboard = () => {
           </div>
           
           <TabsContent value="daily">
-            <Card>
+            <Card className="mb-8"> {/* Added margin-bottom to create space */}
               <CardHeader>
                 <CardTitle>Serviços - Última Semana</CardTitle>
                 <CardDescription>
                   Distribuição de serviços por dia da semana
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-80">
+              <CardContent className="h-[350px]"> {/* Fixed height to prevent overflow */}
                 <ChartContainer
                   config={{
                     corte: { label: "Cortes", color: "#9b87f5" },
@@ -167,14 +167,14 @@ const AdminDashboard = () => {
           </TabsContent>
           
           <TabsContent value="monthly">
-            <Card>
+            <Card className="mb-8"> {/* Added margin-bottom to create space */}
               <CardHeader>
                 <CardTitle>Serviços - Este Ano</CardTitle>
                 <CardDescription>
                   Distribuição de serviços por mês
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-80">
+              <CardContent className="h-[350px]"> {/* Fixed height to prevent overflow */}
                 <ChartContainer
                   config={{
                     corte: { label: "Cortes", color: "#9b87f5" },
@@ -197,14 +197,14 @@ const AdminDashboard = () => {
           </TabsContent>
           
           <TabsContent value="yearly">
-            <Card>
+            <Card className="mb-8"> {/* Added margin-bottom to create space */}
               <CardHeader>
                 <CardTitle>Serviços - Histórico Anual</CardTitle>
                 <CardDescription>
                   Evolução de serviços por ano
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-80">
+              <CardContent className="h-[350px]"> {/* Fixed height to prevent overflow */}
                 <ChartContainer
                   config={{
                     corte: { label: "Cortes", color: "#9b87f5" },
