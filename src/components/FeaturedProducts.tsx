@@ -11,47 +11,17 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { UseEmblaCarouselType } from "embla-carousel-react";
+import { useProductsStore } from "@/store/productsStore";
 
 export const FeaturedProducts = () => {
+  const { products } = useProductsStore();
   const [currentPage, setCurrentPage] = useState(0);
   
-  const featuredProducts = [
-    {
-      id: "1",
-      name: "Pomada Modeladora",
-      description: "Pomada de fixação média para um look natural e elegante.",
-      price: "15€",
-      imagePath: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-      category: "Styling",
-      featured: true
-    },
-    {
-      id: "5",
-      name: "Kit de Barbear Tradicional",
-      description: "Kit completo com navalha, pincel e sabonete para uma experiência de barbear tradicional.",
-      price: "45€",
-      imagePath: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-      category: "Barba",
-      featured: true
-    },
-    {
-      id: "3",
-      name: "Champô Anticaspa",
-      description: "Champô especializado para combater a caspa e manter o couro cabeludo saudável.",
-      price: "14€",
-      imagePath: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-      category: "Cabelo"
-    },
-    {
-      id: "2",
-      name: "Óleo para Barba",
-      description: "Óleo nutritivo que suaviza e dá brilho à barba, evitando a descamação.",
-      price: "12€",
-      imagePath: "https://images.unsplash.com/photo-1564594985201-7149e707ef4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-      category: "Barba"
-    }
-  ];
+  // Get featured products, or top 4 if not enough featured
+  const featuredProducts = products
+    .filter(product => product.featured)
+    .concat(products.filter(product => !product.featured))
+    .slice(0, 4);
 
   return (
     <section className="py-16 bg-gray-50">
@@ -72,11 +42,9 @@ export const FeaturedProducts = () => {
               loop: true,
             }}
             className="w-full"
-            onSelect={(api: UseEmblaCarouselType[0]) => {
-              if (api) {
-                const selectedIndex = api.selectedScrollSnap();
-                setCurrentPage(selectedIndex);
-              }
+            onSelect={(api) => {
+              const selectedIndex = api?.selectedScrollSnap?.() ?? 0;
+              setCurrentPage(selectedIndex);
             }}
           >
             <CarouselContent>

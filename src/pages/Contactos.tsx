@@ -7,8 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { ChatBot } from "@/components/ChatBot";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useCompanyStore } from "@/store/companyStore";
 
 const Contactos = () => {
+  const { info } = useCompanyStore();
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -66,24 +69,26 @@ const Contactos = () => {
               <div className="space-y-4 mb-8">
                 <div>
                   <h3 className="text-lg font-semibold mb-1">Morada</h3>
-                  <p className="text-gray-600">Rua da Barbearia, 123, Lisboa, Portugal</p>
+                  <p className="text-gray-600">{info.address}, {info.city}, {info.country}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-lg font-semibold mb-1">Telefone</h3>
-                  <p className="text-gray-600">+351 912 345 678</p>
+                  <p className="text-gray-600">{info.phone}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-lg font-semibold mb-1">E-mail</h3>
-                  <p className="text-gray-600">info@clubedanavalha.pt</p>
+                  <p className="text-gray-600">{info.email}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-lg font-semibold mb-1">Horário</h3>
                   <p className="text-gray-600">
-                    Terça a Sábado: 10h - 19h<br />
-                    Domingo e Segunda: Fechado
+                    Terça a Sexta: {info.workHours.weekdays}<br />
+                    Sábado: {info.workHours.saturday}<br />
+                    Domingo: {info.workHours.sunday}<br />
+                    Segunda: {info.workHours.monday}
                   </p>
                 </div>
               </div>
@@ -92,7 +97,7 @@ const Contactos = () => {
               <div className="rounded-lg overflow-hidden h-80 bg-gray-200 w-full">
                 <iframe
                   title="Mapa de localização"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24984.698276505305!2d-9.15680664149265!3d38.71404358002728!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd19331a61e4f33b%3A0x9dd67cf946a3d3a7!2sLisboa!5e0!3m2!1spt-PT!2spt!4v1682616427527!5m2!1spt-PT!2spt"
+                  src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.8218505544974!2d${info.location.lng}!3d${info.location.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDQzJzI0LjAiTiAwOcKwMDgnMTYuOCJX!5e0!3m2!1spt-PT!2spt!4v1621422345678!5m2!1spt-PT!2spt`}
                   className="w-full h-full"
                   style={{ border: 0 }}
                   allowFullScreen={true}

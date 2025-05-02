@@ -82,7 +82,7 @@ const AdminServices = () => {
       });
     } else {
       // Add new service
-      const newService = {
+      const newService: Service = {
         id: Date.now().toString(),
         ...data,
         featured: data.featured || false

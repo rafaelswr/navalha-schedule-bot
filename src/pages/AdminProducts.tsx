@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { useProductsStore, Product } from "@/store/productsStore";
 
 // Define the form schema for products
 const productSchema = z.object({
@@ -25,43 +25,12 @@ const productSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
-// Mock data for products (in a real app this would come from a database)
-const initialProducts = [
-  {
-    id: "1",
-    name: "Pomada Modeladora",
-    description: "Pomada de fixação média para um look natural e elegante. Ideal para todos os tipos de cabelo.",
-    price: "15€",
-    imagePath: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    category: "Styling",
-    featured: true
-  },
-  {
-    id: "2",
-    name: "Óleo para Barba",
-    description: "Óleo nutritivo que suaviza e dá brilho à barba, evitando a descamação e hidratando a pele.",
-    price: "12€",
-    imagePath: "https://images.unsplash.com/photo-1564594985201-7149e707ef4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    category: "Barba",
-    featured: false
-  },
-  {
-    id: "3",
-    name: "Champô Anticaspa",
-    description: "Champô especializado para combater a caspa e manter o couro cabeludo saudável.",
-    price: "14€",
-    imagePath: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    category: "Cabelo",
-    featured: false
-  },
-];
-
 // Available product categories
 const categories = ["Barba", "Cabelo", "Styling", "Acessórios"];
 
 const AdminProducts = () => {
-  const [products, setProducts] = useState(initialProducts);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const { products, addProduct, updateProduct, deleteProduct } = useProductsStore();
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -84,7 +53,7 @@ const AdminProducts = () => {
     setIsDialogOpen(true);
   };
 
-  const openEditProductDialog = (product: any) => {
+  const openEditProductDialog = (product: Product) => {
     form.reset({
       name: product.name,
       description: product.description,
@@ -98,7 +67,7 @@ const AdminProducts = () => {
   };
 
   const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter(product => product.id !== id));
+    deleteProduct(id);
     toast({
       title: "Produto eliminado",
       description: "O produto foi eliminado com sucesso"
@@ -108,20 +77,19 @@ const AdminProducts = () => {
   const onSubmit = (data: ProductFormValues) => {
     if (editingProduct) {
       // Update existing product
-      setProducts(products.map(product => 
-        product.id === editingProduct.id ? { ...product, ...data } : product
-      ));
+      updateProduct(editingProduct.id, data);
       toast({
         title: "Produto atualizado",
         description: "O produto foi atualizado com sucesso"
       });
     } else {
       // Add new product
-      const newProduct = {
+      const newProduct: Product = {
         id: Date.now().toString(),
-        ...data
+        ...data,
+        featured: data.featured || false
       };
-      setProducts([...products, newProduct]);
+      addProduct(newProduct);
       toast({
         title: "Produto adicionado",
         description: "O novo produto foi adicionado com sucesso"

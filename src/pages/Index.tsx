@@ -9,12 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Scissors } from "lucide-react";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { useServicesStore } from "@/store/servicesStore";
+import { useCompanyStore } from "@/store/companyStore";
 
 const Index = () => {
   const { services } = useServicesStore();
+  const { info } = useCompanyStore();
   
   // Get top 3 services, prioritizing featured ones
-  const topServices = services
+  const topServices = [...services]
     .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
     .slice(0, 3);
 
@@ -63,7 +65,7 @@ const Index = () => {
               Por Que <span className="text-navalha-burgundy">Escolher-nos</span>
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              No Clube da Navalha, oferecemos mais do que cortes de cabelo. Proporcionamos uma experiência completa.
+              No {info.name}, oferecemos mais do que cortes de cabelo. Proporcionamos uma experiência completa.
             </p>
           </div>
           

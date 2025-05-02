@@ -7,80 +7,66 @@ interface GoogleMapProps {
   onLocationChange?: (lat: number, lng: number) => void;
 }
 
+declare global {
+  interface Window {
+    google: any;
+    initMap: () => void;
+  }
+}
+
 export const GoogleMap = ({ initialLat, initialLng, onLocationChange }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  
-  // Load Google Maps script
+  const [map, setMap] = useState<any>(null);
+  const [marker, setMarker] = useState<any>(null);
+
   useEffect(() => {
-    // Check if the API script is already loaded
-    if (window.google && window.google.maps) {
-      setMapLoaded(true);
-      return;
+    // Function to initialize the map
+    window.initMap = () => {
+      if (!mapRef.current) return;
+
+      const mapOptions = {
+        center: { lat: initialLat, lng: initialLng },
+        zoom: 15,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        streetViewControl: false
+      };
+
+      const newMap = new window.google.maps.Map(mapRef.current, mapOptions);
+      setMap(newMap);
+
+      const newMarker = new window.google.maps.Marker({
+        position: { lat: initialLat, lng: initialLng },
+        map: newMap,
+        draggable: !!onLocationChange,
+        animation: window.google.maps.Animation.DROP
+      });
+      setMarker(newMarker);
+
+      // If onLocationChange is provided, add drag end listener
+      if (onLocationChange) {
+        newMarker.addListener("dragend", () => {
+          const position = newMarker.getPosition();
+          onLocationChange(position.lat(), position.lng());
+        });
+      }
+    };
+
+    // Load Google Maps API if it's not already loaded
+    if (!window.google) {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBiXDlZo-FKXJCn6Clo8bo22i2yzvs8Gw0&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+      
+      return () => {
+        document.head.removeChild(script);
+      };
+    } else {
+      window.initMap();
     }
-    
-    const googleMapsScript = document.createElement('script');
-    googleMapsScript.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA-mOB5XKBjZHo8XU4VcX6sPOGgG-woPdQ&libraries=places`;
-    googleMapsScript.async = true;
-    googleMapsScript.defer = true;
-    
-    googleMapsScript.addEventListener('load', () => {
-      setMapLoaded(true);
-    });
-    
-    document.head.appendChild(googleMapsScript);
-    
-    return () => {
-      document.head.removeChild(googleMapsScript);
-    };
-  }, []);
-  
-  // Initialize map once script is loaded
-  useEffect(() => {
-    if (!mapLoaded || !mapRef.current) return;
-    
-    const mapInstance = new window.google.maps.Map(mapRef.current, {
-      center: { lat: initialLat, lng: initialLng },
-      zoom: 15,
-      mapTypeControl: false,
-      streetViewControl: false,
-    });
-    
-    const markerInstance = new window.google.maps.Marker({
-      position: { lat: initialLat, lng: initialLng },
-      map: mapInstance,
-      draggable: true,
-      title: "Localização da Barbearia",
-    });
-    
-    // Add marker drag event listener
-    markerInstance.addListener('dragend', () => {
-      const position = markerInstance.getPosition();
-      if (position && onLocationChange) {
-        onLocationChange(position.lat(), position.lng());
-      }
-    });
-    
-    setMap(mapInstance);
-    setMarker(markerInstance);
-    
-    return () => {
-      // Clean up
-      if (markerInstance) {
-        markerInstance.setMap(null);
-      }
-    };
-  }, [mapLoaded, initialLat, initialLng, onLocationChange]);
-  
-  return (
-    <div ref={mapRef} className="w-full h-full">
-      {!mapLoaded && (
-        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-          <p>Carregando mapa...</p>
-        </div>
-      )}
-    </div>
-  );
+  }, [initialLat, initialLng, onLocationChange]);
+
+  return <div ref={mapRef} style={{ width: '100%', height: '100%' }} />;
 };
