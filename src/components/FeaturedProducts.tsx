@@ -71,8 +71,12 @@ export const FeaturedProducts = () => {
               loop: true,
             }}
             className="w-full"
-            onSelect={(index) => {
-              setCurrentPage(index);
+            onSelect={(api) => {
+              if (api) {
+                // Get the current index from the API and use it to update state
+                const selectedIndex = api.selectedScrollSnap();
+                setCurrentPage(selectedIndex);
+              }
             }}
           >
             <CarouselContent>
