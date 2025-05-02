@@ -81,10 +81,14 @@ const AdminServices = () => {
         description: "O serviço foi atualizado com sucesso"
       });
     } else {
-      // Add new service
+      // Add new service - Ensure all required fields are present
       const newService: Service = {
         id: Date.now().toString(),
-        ...data,
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        duration: data.duration,
+        imagePath: data.imagePath,
         featured: data.featured || false
       };
       addService(newService);

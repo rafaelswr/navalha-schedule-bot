@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -83,10 +84,14 @@ const AdminProducts = () => {
         description: "O produto foi atualizado com sucesso"
       });
     } else {
-      // Add new product
+      // Add new product - Ensure all required fields are present
       const newProduct: Product = {
         id: Date.now().toString(),
-        ...data,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        imagePath: data.imagePath,
+        category: data.category,
         featured: data.featured || false
       };
       addProduct(newProduct);
