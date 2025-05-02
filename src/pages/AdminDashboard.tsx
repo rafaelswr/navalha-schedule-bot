@@ -45,6 +45,14 @@ const yearlyData = [
   { name: "2024", corte: 3200, barba: 2600, total: 5800 },
 ];
 
+// Mock recent appointments data
+const recentAppointments = [
+  { cliente: "Ricardo Santos", servico: "Corte + Barba", data: "02/05/2025", hora: "14:30", valor: "25€" },
+  { cliente: "João Oliveira", servico: "Barba", data: "02/05/2025", hora: "15:30", valor: "12€" },
+  { cliente: "Tiago Ferreira", servico: "Corte de Cabelo", data: "02/05/2025", hora: "16:30", valor: "15€" },
+  { cliente: "André Martins", servico: "Pacote Premium", data: "02/05/2025", hora: "17:30", valor: "40€" },
+];
+
 // Mock appointments data
 const appointmentsData = [
   { date: new Date(2025, 4, 1), appointments: [
