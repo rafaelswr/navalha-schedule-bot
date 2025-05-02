@@ -9,7 +9,6 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi
 } from "@/components/ui/carousel";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useProductsStore } from "@/store/productsStore";
@@ -43,7 +42,7 @@ export const FeaturedProducts = () => {
               loop: true,
             }}
             className="w-full"
-            onSelect={(api: CarouselApi) => {
+            onSelect={(api) => {
               if (api) {
                 const selectedIndex = api.selectedScrollSnap();
                 setCurrentPage(selectedIndex);

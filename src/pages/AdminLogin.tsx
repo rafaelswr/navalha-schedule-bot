@@ -1,11 +1,11 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Scissors } from "lucide-react";
+import { ArrowLeft, Scissors } from "lucide-react";
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -40,6 +40,18 @@ const AdminLogin = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="absolute top-4 left-4">
+        <Button 
+          variant="ghost" 
+          className="flex items-center gap-1 text-gray-600 hover:text-navalha-burgundy"
+          asChild
+        >
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4" />
+            Voltar à Página Inicial
+          </Link>
+        </Button>
+      </div>
       <Card className="w-full max-w-md mx-4 shadow-lg">
         <CardHeader className="space-y-1 text-center bg-navalha-gold text-black py-6">
           <div className="flex justify-center mb-2">

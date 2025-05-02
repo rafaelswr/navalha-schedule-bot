@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Scissors, Calendar, UsersIcon, LogOut, Store, FileText, Building } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Eye, EyeOff, Scissors, Calendar as CalendarIcon, UsersIcon, LogOut, Store, FileText, Building, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, addMonths, subMonths, isSameDay } from "date-fns";
 
 // Mock data for the dashboard
 const dailyData = [
@@ -42,22 +45,60 @@ const yearlyData = [
   { name: "2024", corte: 3200, barba: 2600, total: 5800 },
 ];
 
-// Recent appointments data
-const recentAppointments = [
-  { cliente: "João Silva", servico: "Corte + Barba", data: "02/05/2025", hora: "10:00", valor: "25€" },
-  { cliente: "Manuel Costa", servico: "Barba", data: "02/05/2025", hora: "11:00", valor: "12€" },
-  { cliente: "António Ferreira", servico: "Corte de Cabelo", data: "02/05/2025", hora: "12:00", valor: "15€" },
-  { cliente: "Pedro Santos", servico: "Tratamento Facial", data: "02/05/2025", hora: "14:00", valor: "20€" },
-  { cliente: "Carlos Lopes", servico: "Pacote Premium", data: "02/05/2025", hora: "15:30", valor: "40€" },
+// Mock appointments data
+const appointmentsData = [
+  { date: new Date(2025, 4, 1), appointments: [
+    { cliente: "António Ribeiro", servico: "Corte + Barba", hora: "09:00", valor: "25€" },
+    { cliente: "Pedro Costa", servico: "Corte de Cabelo", hora: "11:30", valor: "15€" },
+    { cliente: "Rui Mendes", servico: "Barba", hora: "14:00", valor: "12€" },
+  ]},
+  { date: new Date(2025, 4, 2), appointments: [
+    { cliente: "João Silva", servico: "Corte + Barba", hora: "10:00", valor: "25€" },
+    { cliente: "Manuel Costa", servico: "Barba", hora: "11:00", valor: "12€" },
+    { cliente: "António Ferreira", servico: "Corte de Cabelo", hora: "12:00", valor: "15€" },
+    { cliente: "Pedro Santos", servico: "Tratamento Facial", hora: "14:00", valor: "20€" },
+    { cliente: "Carlos Lopes", servico: "Pacote Premium", hora: "15:30", valor: "40€" },
+  ]},
+  { date: new Date(2025, 4, 3), appointments: [
+    { cliente: "Miguel Ramos", servico: "Corte de Cabelo", hora: "09:30", valor: "15€" },
+    { cliente: "José Almeida", servico: "Barba", hora: "13:00", valor: "12€" },
+    { cliente: "Francisco Silva", servico: "Corte + Barba", hora: "16:30", valor: "25€" },
+  ]},
+  { date: new Date(2025, 3, 28), appointments: [
+    { cliente: "Duarte Fonseca", servico: "Corte de Cabelo", hora: "10:00", valor: "15€" },
+    { cliente: "Tomás Costa", servico: "Pacote Premium", hora: "14:00", valor: "40€" },
+  ]},
+  { date: new Date(2025, 3, 29), appointments: [
+    { cliente: "Paulo Marques", servico: "Barba", hora: "09:00", valor: "12€" },
+    { cliente: "Jorge Mendes", servico: "Corte + Barba", hora: "11:30", valor: "25€" },
+    { cliente: "Fernando Sousa", servico: "Tratamento Facial", hora: "15:00", valor: "20€" },
+  ]},
 ];
 
 const AdminDashboard = () => {
   const [period, setPeriod] = useState("daily");
+  const [date, setDate] = useState<Date>(new Date());
+  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+  const [showBilling, setShowBilling] = useState(true);
   const navigate = useNavigate();
 
   const handleLogout = () => {
     navigate("/barbalogin");
   };
+
+  const appointmentsForSelectedDate = appointmentsData.find(item => 
+    isSameDay(item.date, date)
+  )?.appointments || [];
+
+  const handlePreviousMonth = () => {
+    setCalendarMonth(prev => subMonths(prev, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCalendarMonth(prev => addMonths(prev, 1));
+  };
+
+  const daysWithAppointments = appointmentsData.map(item => item.date);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -97,15 +138,29 @@ const AdminDashboard = () => {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Faturação Mensal</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
+                <span>Faturação Mensal</span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-5 w-5 rounded-full"
+                  onClick={() => setShowBilling(!showBilling)}
+                >
+                  {showBilling ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </CardTitle>
               <div className="flex items-baseline justify-between">
-                <CardDescription className="text-3xl font-bold">3.450€</CardDescription>
-                <CardDescription className="text-emerald-500 text-sm font-medium">+8% vs mês anterior</CardDescription>
+                <CardDescription className="text-3xl font-bold">
+                  {showBilling ? "3.450€" : "****"}
+                </CardDescription>
+                <CardDescription className="text-emerald-500 text-sm font-medium">
+                  {showBilling ? "+8% vs mês anterior" : "**"}
+                </CardDescription>
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-xs text-muted-foreground">
-                Média diária: 115€
+                {showBilling ? "Média diária: 115€" : "Média diária: **€"}
               </div>
             </CardContent>
           </Card>
@@ -122,6 +177,98 @@ const AdminDashboard = () => {
               <div className="text-xs text-muted-foreground">
                 78% taxa de retorno
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Calendar and Appointments Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <Card className="md:col-span-1">
+            <CardHeader>
+              <div className="flex items-center justify-between mb-2">
+                <CardTitle>Calendário</CardTitle>
+                <div className="flex space-x-1">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8 p-0"
+                    onClick={handlePreviousMonth}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8 p-0"
+                    onClick={handleNextMonth}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <CardDescription>
+                {format(calendarMonth, "MMMM yyyy")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(newDate) => newDate && setDate(newDate)}
+                month={calendarMonth}
+                className="p-3 pointer-events-auto"
+                modifiers={{
+                  hasAppointment: daysWithAppointments
+                }}
+                modifiersStyles={{
+                  hasAppointment: { 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8e3c5',
+                    color: '#1f2937'
+                  }
+                }}
+              />
+            </CardContent>
+          </Card>
+          
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Agendamentos: {format(date, "dd/MM/yyyy")}</CardTitle>
+              <CardDescription>
+                {appointmentsForSelectedDate.length > 0 
+                  ? `${appointmentsForSelectedDate.length} serviços agendados neste dia` 
+                  : "Sem agendamentos para este dia"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {appointmentsForSelectedDate.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Hora</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Serviço</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {appointmentsForSelectedDate.map((appointment, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{appointment.hora}</TableCell>
+                        <TableCell>{appointment.cliente}</TableCell>
+                        <TableCell>{appointment.servico}</TableCell>
+                        <TableCell className="text-right">{appointment.valor}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <CalendarIcon className="h-12 w-12 text-gray-300 mb-2" />
+                  <p className="text-gray-500">Não há agendamentos para mostrar neste dia</p>
+                  <p className="text-gray-400 text-sm">Selecione outra data no calendário</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
