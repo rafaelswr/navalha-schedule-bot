@@ -8,32 +8,15 @@ import { ChatBot } from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
 import { Scissors } from "lucide-react";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
+import { useServicesStore } from "@/store/servicesStore";
 
 const Index = () => {
-  const services = [
-    {
-      title: "Corte de Cabelo",
-      description: "Corte moderno executado com perícia e precisão, inclui lavagem e styling.",
-      price: "15€",
-      duration: "30 min",
-      imagePath: "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      title: "Corte + Barba",
-      description: "Combinação perfeita de corte de cabelo e aparagem de barba com toalha quente.",
-      price: "25€",
-      duration: "60 min",
-      featured: true,
-      imagePath: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      title: "Barba",
-      description: "Tratamento completo de barba com toalha quente, óleos essenciais e aparagem.",
-      price: "12€",
-      duration: "30 min",
-      imagePath: "https://images.unsplash.com/photo-1593702288056-7056d12307fc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    }
-  ];
+  const { services } = useServicesStore();
+  
+  // Get top 3 services, prioritizing featured ones
+  const topServices = services
+    .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
+    .slice(0, 3);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -45,7 +28,7 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="font-bold mb-4">
-              Os Nossos <span className="text-black">Serviços</span> {/* Changed from text-navalha-burgundy to text-black */}
+              Os Nossos <span className="text-black">Serviços</span>
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Oferecemos uma gama de serviços de barbearia de alta qualidade, executados por profissionais experientes.
@@ -53,8 +36,8 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <ServiceCard key={index} {...service} />
+            {topServices.map((service) => (
+              <ServiceCard key={service.id} {...service} />
             ))}
           </div>
           

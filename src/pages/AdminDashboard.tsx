@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Scissors, Calendar, UsersIcon, LogOut, Store, FileText } from "lucide-react";
+import { Scissors, Calendar, UsersIcon, LogOut, Store, FileText, Building } from "lucide-react";
 
 // Mock data for the dashboard
 const dailyData = [
@@ -128,7 +127,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Admin Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate("/admin/services")}>
             <CardHeader>
               <div className="flex items-center space-x-2">
@@ -156,6 +155,21 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <p>Gira os produtos disponíveis na loja online do Clube da Navalha.</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate("/admin/company")}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Building className="h-6 w-6 text-navalha-burgundy" />
+                <CardTitle>Dados da Empresa</CardTitle>
+              </div>
+              <CardDescription>
+                Gerencie as informações de contacto e localização
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Atualize endereço, contactos, redes sociais e localização no mapa.</p>
             </CardContent>
           </Card>
         </div>

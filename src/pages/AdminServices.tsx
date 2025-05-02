@@ -6,12 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Scissors, ArrowLeft, Pencil, Trash2, Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { useServicesStore, Service } from "@/store/servicesStore";
 
 // Define the form schema for services
 const serviceSchema = z.object({
@@ -25,40 +26,9 @@ const serviceSchema = z.object({
 
 type ServiceFormValues = z.infer<typeof serviceSchema>;
 
-// Mock data for services (in a real app this would come from a database)
-const initialServices = [
-  {
-    id: "1",
-    title: "Corte de Cabelo",
-    description: "Corte moderno executado com perícia e precisão, inclui lavagem e styling.",
-    price: "15€",
-    duration: "30 min",
-    imagePath: "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    featured: false
-  },
-  {
-    id: "2",
-    title: "Corte + Barba",
-    description: "Combinação perfeita de corte de cabelo e aparagem de barba com toalha quente.",
-    price: "25€",
-    duration: "60 min",
-    imagePath: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    featured: true
-  },
-  {
-    id: "3",
-    title: "Barba",
-    description: "Tratamento completo de barba com toalha quente, óleos essenciais e aparagem.",
-    price: "12€",
-    duration: "30 min",
-    imagePath: "https://images.unsplash.com/photo-1593702288056-7056d12307fc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
-    featured: false
-  },
-];
-
 const AdminServices = () => {
-  const [services, setServices] = useState(initialServices);
-  const [editingService, setEditingService] = useState<any>(null);
+  const { services, addService, updateService, deleteService } = useServicesStore();
+  const [editingService, setEditingService] = useState<Service | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -81,7 +51,7 @@ const AdminServices = () => {
     setIsDialogOpen(true);
   };
 
-  const openEditServiceDialog = (service: any) => {
+  const openEditServiceDialog = (service: Service) => {
     form.reset({
       title: service.title,
       description: service.description,
@@ -95,7 +65,7 @@ const AdminServices = () => {
   };
 
   const handleDeleteService = (id: string) => {
-    setServices(services.filter(service => service.id !== id));
+    deleteService(id);
     toast({
       title: "Serviço eliminado",
       description: "O serviço foi eliminado com sucesso"
@@ -105,9 +75,7 @@ const AdminServices = () => {
   const onSubmit = (data: ServiceFormValues) => {
     if (editingService) {
       // Update existing service
-      setServices(services.map(service => 
-        service.id === editingService.id ? { ...service, ...data } : service
-      ));
+      updateService(editingService.id, data);
       toast({
         title: "Serviço atualizado",
         description: "O serviço foi atualizado com sucesso"
@@ -116,9 +84,10 @@ const AdminServices = () => {
       // Add new service
       const newService = {
         id: Date.now().toString(),
-        ...data
+        ...data,
+        featured: data.featured || false
       };
-      setServices([...services, newService]);
+      addService(newService);
       toast({
         title: "Serviço adicionado",
         description: "O novo serviço foi adicionado com sucesso"
