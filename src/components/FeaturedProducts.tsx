@@ -17,12 +17,22 @@ import { useProductsStore } from "@/store/productsStore";
 export const FeaturedProducts = () => {
   const { products } = useProductsStore();
   const [currentPage, setCurrentPage] = useState(0);
+  const [api, setApi] = useState<CarouselApi | null>(null);
   
   // Get featured products, or top 4 if not enough featured
   const featuredProducts = products
     .filter(product => product.featured)
     .concat(products.filter(product => !product.featured))
     .slice(0, 4);
+
+  // Update current slide index when carousel changes
+  const handleApiChange = (api: CarouselApi | null) => {
+    if (!api) return;
+    
+    api.on("select", () => {
+      setCurrentPage(api.selectedScrollSnap());
+    });
+  };
 
   return (
     <section className="py-16 bg-gray-50">
@@ -43,12 +53,7 @@ export const FeaturedProducts = () => {
               loop: true,
             }}
             className="w-full"
-            onSelect={(api: CarouselApi) => {
-              if (api) {
-                const selectedIndex = api.selectedScrollSnap();
-                setCurrentPage(selectedIndex);
-              }
-            }}
+            setApi={handleApiChange}
           >
             <CarouselContent>
               {featuredProducts.map((product) => (
@@ -88,3 +93,4 @@ export const FeaturedProducts = () => {
     </section>
   );
 };
+
