@@ -10,6 +10,8 @@ import Agendamento from "./pages/Agendamento";
 import Contactos from "./pages/Contactos";
 import NotFound from "./pages/NotFound";
 import Loja from "./pages/Loja";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/agendamento" element={<Agendamento />} />
           <Route path="/contactos" element={<Contactos />} />
           <Route path="/loja" element={<Loja />} />
+          <Route path="/barbalogin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
