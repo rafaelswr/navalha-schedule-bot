@@ -138,14 +138,14 @@ const AdminDashboard = () => {
           </div>
           
           <TabsContent value="daily">
-            <Card className="mb-8"> {/* Added margin-bottom to create space */}
+            <Card className="mb-12"> {/* Increased margin-bottom from mb-8 to mb-12 */}
               <CardHeader>
                 <CardTitle>Serviços - Última Semana</CardTitle>
                 <CardDescription>
                   Distribuição de serviços por dia da semana
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[350px]"> {/* Fixed height to prevent overflow */}
+              <CardContent className="h-[300px]"> {/* Decreased height from 350px to 300px */}
                 <ChartContainer
                   config={{
                     corte: { label: "Cortes", color: "#9b87f5" },
@@ -167,14 +167,14 @@ const AdminDashboard = () => {
           </TabsContent>
           
           <TabsContent value="monthly">
-            <Card className="mb-8"> {/* Added margin-bottom to create space */}
+            <Card className="mb-12"> {/* Increased margin-bottom from mb-8 to mb-12 */}
               <CardHeader>
                 <CardTitle>Serviços - Este Ano</CardTitle>
                 <CardDescription>
                   Distribuição de serviços por mês
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[350px]"> {/* Fixed height to prevent overflow */}
+              <CardContent className="h-[300px]"> {/* Decreased height from 350px to 300px */}
                 <ChartContainer
                   config={{
                     corte: { label: "Cortes", color: "#9b87f5" },
@@ -197,14 +197,14 @@ const AdminDashboard = () => {
           </TabsContent>
           
           <TabsContent value="yearly">
-            <Card className="mb-8"> {/* Added margin-bottom to create space */}
+            <Card className="mb-12"> {/* Increased margin-bottom from mb-8 to mb-12 */}
               <CardHeader>
                 <CardTitle>Serviços - Histórico Anual</CardTitle>
                 <CardDescription>
                   Evolução de serviços por ano
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[350px]"> {/* Fixed height to prevent overflow */}
+              <CardContent className="h-[300px]"> {/* Decreased height from 350px to 300px */}
                 <ChartContainer
                   config={{
                     corte: { label: "Cortes", color: "#9b87f5" },

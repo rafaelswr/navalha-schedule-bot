@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -44,7 +45,7 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              Os Nossos <span className="text-navalha-burgundy">Serviços</span>
+              Os Nossos <span className="text-black">Serviços</span> {/* Changed from text-navalha-burgundy to text-black */}
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Oferecemos uma gama de serviços de barbearia de alta qualidade, executados por profissionais experientes.

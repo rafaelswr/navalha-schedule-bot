@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -72,7 +71,7 @@ export const FeaturedProducts = () => {
             }}
             className="w-full"
             onSelect={(api) => {
-              if (api) {
+              if (api && typeof api !== 'object' && typeof api.selectedScrollSnap === 'function') {
                 // Get the current index from the API and use it to update state
                 const selectedIndex = api.selectedScrollSnap();
                 setCurrentPage(selectedIndex);
