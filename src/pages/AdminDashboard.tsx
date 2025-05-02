@@ -204,7 +204,7 @@ const AdminDashboard = () => {
                   Evolução de serviços por ano
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[300px]"> {/* Decreased height from 350px to 300px */}
+              <CardContent className="h-auto"> {/* Decreased height from 350px to 300px */}
                 <ChartContainer
                   config={{
                     corte: { label: "Cortes", color: "#9b87f5" },
