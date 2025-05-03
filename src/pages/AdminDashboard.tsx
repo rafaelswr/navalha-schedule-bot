@@ -215,6 +215,17 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     navigate("/barbalogin");
   };
+  
+  // Use filtered data based on barber filter selection
+  const currentAppointmentsData = appointmentsDataByBarber[barberFilter];
+  const currentDailyData = dailyDataByBarber[barberFilter];
+  const currentMonthlyData = monthlyDataByBarber[barberFilter];
+  const currentYearlyData = yearlyDataByBarber[barberFilter];
+  const currentKpiData = kpiDataByBarber[barberFilter];
+  
+  const appointmentsForSelectedDate = currentAppointmentsData.find(item => 
+    isSameDay(item.date, date)
+  )?.appointments || [];
 
   const handlePreviousMonth = () => {
     setCalendarMonth(prev => subMonths(prev, 1));
