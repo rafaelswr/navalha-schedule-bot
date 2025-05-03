@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useBarbers } from "@/hooks/use-barbers";
 
 const FormSchema = z.object({
   name: z.string().min(3, {
@@ -46,6 +47,9 @@ const FormSchema = z.object({
   }),
   service: z.string({
     required_error: "Por favor seleciona um serviço.",
+  }),
+  barber: z.string({
+    required_error: "Por favor seleciona um barbeiro.",
   }),
   date: z.date({
     required_error: "Por favor seleciona uma data.",
@@ -70,6 +74,7 @@ const OCCUPIED_SLOTS: { [key: string]: string[] } = {
 
 export const AppointmentForm = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const { barbers, isLoading } = useBarbers();
   
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -165,29 +170,60 @@ export const AppointmentForm = () => {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="service"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Serviço</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleciona o serviço desejado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="corte">Corte de Cabelo</SelectItem>
-                      <SelectItem value="barba">Barba</SelectItem>
-                      <SelectItem value="combo">Corte + Barba</SelectItem>
-                      <SelectItem value="premium">Tratamento Premium</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="service"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Serviço</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleciona o serviço desejado" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="corte">Corte de Cabelo</SelectItem>
+                        <SelectItem value="barba">Barba</SelectItem>
+                        <SelectItem value="combo">Corte + Barba</SelectItem>
+                        <SelectItem value="premium">Tratamento Premium</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="barber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Barbeiro</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleciona o barbeiro" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {isLoading ? (
+                          <SelectItem value="loading" disabled>Carregando...</SelectItem>
+                        ) : (
+                          barbers.filter(barber => barber.status === "active").map(barber => (
+                            <SelectItem key={barber.id} value={barber.id}>
+                              {barber.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
