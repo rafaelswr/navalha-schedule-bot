@@ -9,7 +9,7 @@ export const Footer = () => {
   
   return (
     <footer className="bg-navalha-black text-white py-12">
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 max-w-8xl">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-navalha-gold text-xl font-semibold mb-4">{info.name}</h3>
@@ -84,7 +84,10 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} {info.name}. Todos os direitos reservados.</p>
+          <p className="mb-2">&copy; {new Date().getFullYear()} {info.name}. Todos os direitos reservados.</p>
+          <span className="font-semibold">
+            Criado por <a href="https://norteweb.pt" target="_blank" rel="noopener noreferrer" aria-label="Visitar NorteWeb" className="text-blue-600 hover:text-blue-800">NorteWeb</a>
+          </span>
         </div>
       </div>
     </footer>

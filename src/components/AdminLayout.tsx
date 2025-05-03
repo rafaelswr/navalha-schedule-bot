@@ -52,9 +52,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col w-full bg-gray-50">
+    <div className="min-h-screen flex flex-col w-full bg-gray-50 text-lg leading-relaxed">
       <header className="w-full bg-navalha-black text-white py-2 px-4 shadow-md">
-        <div className="container mx-auto flex items-center justify-between">
+        <div className="container mx-auto max-w-8xl flex items-center justify-between">
           <div className="text-navalha-gold font-bold text-xl">
             Clube da Navalha
           </div>
@@ -89,7 +89,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       </header>
 
       <main className="flex-1 overflow-auto p-6">
-        {children}
+        <div className="container mx-auto max-w-8xl">
+          {children}
+        </div>
       </main>
     </div>
   );
