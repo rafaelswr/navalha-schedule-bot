@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, EyeOff, Scissors, Calendar as CalendarIcon, Users, Building, FileText, Store } from "lucide-react";
-import { format } from "date-fns";
+import { format, addDays, subDays } from "date-fns";
 import { BarbersFilterToggle, BarberFilterValue } from "@/components/ui/barbers-filter-toggle";
 import { useBarberFilter } from "@/hooks/use-barber-filter";
 import { useBarbers } from "@/hooks/use-barbers";
