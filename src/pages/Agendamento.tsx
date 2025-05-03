@@ -27,58 +27,7 @@ const Agendamento = () => {
       
       <section className="py-16 bg-gray-100">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              Marca o teu <span className="text-navalha-burgundy">Horário</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Escolhe a data e hora que melhor se adequam à tua agenda. A confirmação será enviada para o teu e-mail.
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <AppointmentForm />
-          </div>
-        </div>
-      </section>
-      
-      <section className="py-16">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              Informações <span className="text-navalha-burgundy">Importantes</span>
-            </h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h3 className="text-xl font-bold mb-3">Política de Cancelamento</h3>
-              <p className="text-gray-600">
-                Pedimos a gentileza de cancelar com pelo menos 2 horas de antecedência, caso não possas comparecer ao agendamento. Isso permite-nos disponibilizar o horário para outro cliente.
-              </p>
-            </div>
-            
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h3 className="text-xl font-bold mb-3">Chegada</h3>
-              <p className="text-gray-600">
-                Aconselhamos chegares 5-10 minutos antes da hora marcada para garantir que tens tempo suficiente para o check-in e relaxar antes do teu serviço.
-              </p>
-            </div>
-            
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h3 className="text-xl font-bold mb-3">Confirmação</h3>
-              <p className="text-gray-600">
-                Após marcares o teu agendamento, receberás uma confirmação por e-mail. Poderemos também entrar em contacto por telefone para confirmar a reserva.
-              </p>
-            </div>
-            
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h3 className="text-xl font-bold mb-3">Métodos de Pagamento</h3>
-              <p className="text-gray-600">
-                Aceitamos pagamentos em dinheiro, cartão de débito e crédito. O pagamento é feito após a conclusão do serviço.
-              </p>
-            </div>
-          </div>
+          <AppointmentForm />
         </div>
       </section>
       

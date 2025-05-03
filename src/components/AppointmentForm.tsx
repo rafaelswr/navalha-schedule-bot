@@ -1,15 +1,11 @@
 
 import { useState } from "react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Clock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { ArrowLeft, Check, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { 
   Form, 
   FormControl, 
@@ -19,23 +15,15 @@ import {
   FormMessage 
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useBarbers } from "@/hooks/use-barbers";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { MultiStepProgress } from "@/components/MultiStepProgress";
+import { BarberSelection } from "@/components/BarberSelection";
+import { ServiceSelection } from "@/components/ServiceSelection";
+import { DateTimeSelection } from "@/components/DateTimeSelection";
 
-const FormSchema = z.object({
+// Form schema for the final step
+const ContactFormSchema = z.object({
   name: z.string().min(3, {
     message: "O nome deve ter pelo menos 3 caracteres.",
   }),
@@ -45,39 +33,24 @@ const FormSchema = z.object({
   phone: z.string().min(9, {
     message: "Número de telefone inválido.",
   }),
-  service: z.string({
-    required_error: "Por favor seleciona um serviço.",
-  }),
-  barber: z.string({
-    required_error: "Por favor seleciona um barbeiro.",
-  }),
-  date: z.date({
-    required_error: "Por favor seleciona uma data.",
-  }),
-  time: z.string({
-    required_error: "Por favor seleciona um horário.",
-  }),
 });
 
-const timeSlots = [
-  "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
-  "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
-  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30"
-];
-
-// Mock dos horários ocupados
-const OCCUPIED_SLOTS: { [key: string]: string[] } = {
-  "2025-05-03": ["10:30", "11:00", "15:00", "15:30"],
-  "2025-05-06": ["14:00", "14:30", "16:00", "16:30"],
-  "2025-05-07": ["12:00", "12:30", "17:00", "17:30"],
-};
+// Steps for the appointment process
+const STEPS = ["Barbeiro", "Serviço", "Data e Hora"];
 
 export const AppointmentForm = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const { barbers, isLoading } = useBarbers();
+  // State for multi-step form
+  const [step, setStep] = useState(0);
   
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  // State for selections
+  const [selectedBarberId, setSelectedBarberId] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
+  
+  // Form for contact information
+  const form = useForm<z.infer<typeof ContactFormSchema>>({
+    resolver: zodResolver(ContactFormSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -85,235 +58,223 @@ export const AppointmentForm = () => {
     },
   });
 
-  // Função para determinar quais horários estão disponíveis
-  const getAvailableTimeSlots = (date: Date | undefined) => {
-    if (!date) return timeSlots;
+  // Handler for moving to the next step
+  const handleNext = () => {
+    if (step === 0 && !selectedBarberId) {
+      toast.error("Por favor, selecione um barbeiro");
+      return;
+    }
     
-    const dateStr = format(date, "yyyy-MM-dd");
-    const occupiedForDate = OCCUPIED_SLOTS[dateStr] || [];
+    if (step === 1 && !selectedServiceId) {
+      toast.error("Por favor, selecione um serviço");
+      return;
+    }
     
-    return timeSlots.filter(time => !occupiedForDate.includes(time));
+    if (step === 2 && (!selectedDate || !selectedTime)) {
+      toast.error("Por favor, selecione data e hora");
+      return;
+    }
+
+    setStep(current => current + 1);
   };
 
-  const availableTimeSlots = getAvailableTimeSlots(selectedDate);
+  // Handler for moving back to the previous step
+  const handleBack = () => {
+    setStep(current => Math.max(0, current - 1));
+  };
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  // Handler for the final form submission
+  const onSubmit = (data: z.infer<typeof ContactFormSchema>) => {
+    // Combine all data from all steps
+    const appointmentData = {
+      ...data,
+      barberId: selectedBarberId,
+      service: selectedServiceId,
+      date: selectedDate,
+      time: selectedTime,
+    };
+    
+    console.log("Appointment data:", appointmentData);
+    
+    // Show success message
     toast.success("Agendamento recebido!", {
-      description: `Marcação para ${format(data.date, "dd/MM/yyyy")} às ${data.time} foi enviada.`,
+      description: `Marcação para ${selectedDate ? new Date(selectedDate).toLocaleDateString('pt-PT') : ''} às ${selectedTime} foi enviada.`,
       duration: 5000,
     });
     
-    console.log("Dados do agendamento:", data);
+    // Reset form and state
     form.reset();
+    setStep(0);
+    setSelectedBarberId(null);
+    setSelectedServiceId(null);
     setSelectedDate(undefined);
-  }
+    setSelectedTime(undefined);
+  };
 
-  // Função para verificar dias da semana permitidos
-  const isDateDisabled = (date: Date) => {
-    const day = date.getDay();
-    // 0 é domingo, 1 é segunda - dias fechados
-    return day === 0 || day === 1;
+  // Handler for canceling the appointment process
+  const handleCancel = () => {
+    if (window.confirm("Tens a certeza que desejas cancelar o agendamento?")) {
+      form.reset();
+      setStep(0);
+      setSelectedBarberId(null);
+      setSelectedServiceId(null);
+      setSelectedDate(undefined);
+      setSelectedTime(undefined);
+      toast.info("Agendamento cancelado");
+    }
   };
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardHeader className="bg-navalha-black text-white">
-        <CardTitle>Marcar Agendamento</CardTitle>
-        <CardDescription className="text-gray-300">
+    <Card className="w-full max-w-4xl mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+      <div className="bg-navalha-black text-white px-6 py-4">
+        <h2 className="text-2xl font-serif">Marcar Agendamento</h2>
+        <p className="text-gray-300 text-sm">
           Reserva o teu horário para um corte ou tratamento de barba
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="O teu nome completo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        </p>
+      </div>
+      
+      <CardContent className="pt-6 pb-8 px-6">
+        {/* Progress indicator */}
+        <MultiStepProgress currentStep={step} steps={STEPS} />
+        
+        {/* Step content */}
+        <div className="mt-6">
+          {/* Step 1: Barber selection */}
+          {step === 0 && (
+            <BarberSelection 
+              selectedBarberId={selectedBarberId}
+              onSelect={setSelectedBarberId}
             />
+          )}
+          
+          {/* Step 2: Service selection */}
+          {step === 1 && (
+            <ServiceSelection
+              selectedServiceId={selectedServiceId}
+              onSelect={setSelectedServiceId}
+            />
+          )}
+          
+          {/* Step 3: Date and time selection */}
+          {step === 2 && (
+            <DateTimeSelection
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+              onDateChange={setSelectedDate}
+              onTimeChange={setSelectedTime}
+            />
+          )}
+          
+          {/* Step 4: Contact information */}
+          {step === 3 && (
+            <>
+              <h3 className="text-lg font-medium mb-4">Informações de contacto</h3>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome</FormLabel>
+                          <FormControl>
+                            <Input placeholder="O teu nome completo" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input placeholder="O teu e-mail" type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Telefone</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Telefone para contacto" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Telefone para contacto" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="service"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Serviço</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleciona o serviço desejado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="corte">Corte de Cabelo</SelectItem>
-                        <SelectItem value="barba">Barba</SelectItem>
-                        <SelectItem value="combo">Corte + Barba</SelectItem>
-                        <SelectItem value="premium">Tratamento Premium</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="barber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Barbeiro</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleciona o barbeiro" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {isLoading ? (
-                          <SelectItem value="loading" disabled>Carregando...</SelectItem>
-                        ) : (
-                          barbers.filter(barber => barber.status === "active").map(barber => (
-                            <SelectItem key={barber.id} value={barber.id}>
-                              {barber.name}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Data</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>E-mail</FormLabel>
                         <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "EEEE, dd/MM/yyyy", { locale: ptBR })
-                            ) : (
-                              <span>Escolhe uma data</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
+                          <Input placeholder="O teu e-mail" type="email" {...field} />
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={(date) => {
-                            field.onChange(date);
-                            setSelectedDate(date);
-                          }}
-                          disabled={(date) => 
-                            isDateDisabled(date) || 
-                            date < new Date()
-                          }
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hora</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleciona um horário" />
-                          <Clock className="h-4 w-4 opacity-50" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {availableTimeSlots.length > 0 ? (
-                          availableTimeSlots.map((slot) => (
-                            <SelectItem key={slot} value={slot}>
-                              {slot}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="none" disabled>
-                            Sem horários disponíveis
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                  <div className="text-sm text-red-600 mt-4">
+                    * A inserção de dados errados pode levar ao cancelamento da marcação sem aviso prévio
+                  </div>
 
+                  <div className="flex flex-col md:flex-row gap-3 pt-4">
+                    <Button 
+                      type="submit" 
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      <Check className="mr-2 h-4 w-4" /> Confirmar
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={handleBack}
+                      className="bg-amber-400 hover:bg-amber-500 text-black"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={handleCancel}
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                    >
+                      <X className="mr-2 h-4 w-4" /> Cancelar
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </>
+          )}
+        </div>
+        
+        {/* Navigation buttons */}
+        {step < 3 && (
+          <div className="flex justify-between mt-8">
             <Button 
-              type="submit" 
-              className="w-full bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white"
+              onClick={handleBack} 
+              disabled={step === 0}
+              className="bg-amber-400 hover:bg-amber-500 text-black"
             >
-              Confirmar Marcação
+              <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
             </Button>
-          </form>
-        </Form>
+            
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleCancel}
+                variant="destructive"
+              >
+                <X className="mr-2 h-4 w-4" /> Cancelar
+              </Button>
+              
+              <Button 
+                onClick={handleNext}
+                className="bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white"
+              >
+                Próximo
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
