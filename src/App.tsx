@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
 // Import existing pages
+import Index from "./pages/Index";
 import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "./components/AdminLayout";
@@ -26,6 +27,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <Toaster />
         <Routes>
+          <Route path="/" element={<Index />} />
           <Route path="/servicos" element={<Servicos />} />
           <Route path="/loja" element={<Loja />} />
           <Route path="/admin/login" element={<AdminLogin />} />
