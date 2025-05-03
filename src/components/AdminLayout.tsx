@@ -3,16 +3,12 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Scissors, Package, Users, Building } from "lucide-react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+  Menubar,
+  MenubarMenu,
+  MenubarTrigger,
+  MenubarContent,
+  MenubarItem,
+} from "@/components/ui/menubar";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -56,49 +52,45 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-gray-50">
-        <Sidebar className="bg-navalha-black text-white">
-          <SidebarHeader>
-            <div className="p-2 flex items-center gap-2">
-              <div className="text-navalha-gold font-bold text-xl">
-                Clube da Navalha
-              </div>
-              <SidebarTrigger />
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.isActive}
-                    tooltip={item.title}
-                  >
+    <div className="min-h-screen flex flex-col w-full bg-gray-50">
+      <header className="w-full bg-navalha-black text-white py-2 px-4 shadow-md">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="text-navalha-gold font-bold text-xl">
+            Clube da Navalha
+          </div>
+          
+          <Menubar className="border-none bg-transparent">
+            {menuItems.map((item) => (
+              <MenubarMenu key={item.path}>
+                <MenubarTrigger 
+                  className={`flex items-center gap-2 hover:bg-gray-700 hover:text-white transition-colors ${
+                    item.isActive ? 'bg-gray-700 text-white' : 'text-gray-200'
+                  }`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.title}</span>
+                </MenubarTrigger>
+                <MenubarContent className="min-w-[8rem]">
+                  <MenubarItem asChild>
                     <Link 
                       to={item.path}
+                      className="flex items-center gap-2 cursor-pointer"
                       aria-current={item.isActive ? "page" : undefined}
                     >
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter>
-            <div className="p-2 text-sm text-gray-400">
-              Área Administrativa
-            </div>
-          </SidebarFooter>
-        </Sidebar>
+                  </MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            ))}
+          </Menubar>
+        </div>
+      </header>
 
-        <main className="flex-1 overflow-auto p-6">
-          {children}
-        </main>
-      </div>
-    </SidebarProvider>
+      <main className="flex-1 overflow-auto p-6">
+        {children}
+      </main>
+    </div>
   );
 }

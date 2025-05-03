@@ -1,9 +1,9 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;700&display=swap');
 
 @layer base {
   :root {
@@ -61,4 +61,14 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
   }
+}
+
+/* Menu customizations */
+.menubar-trigger-active {
+  @apply bg-gray-700 text-white;
+}
+
+/* Ensure menu items have proper hover colors */
+[data-radix-menubar-trigger] {
+  @apply hover:bg-gray-700 hover:text-white transition-colors;
 }

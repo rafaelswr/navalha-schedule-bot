@@ -1,5 +1,5 @@
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useBarberFilter } from "@/hooks/use-barber-filter";
 import { useBarbers } from "@/hooks/use-barbers";
 import { Barber, BarberFormData } from "@/types/barber";
@@ -9,10 +9,9 @@ import { DeleteConfirmationDialog } from "@/components/barbers/DeleteConfirmatio
 import { BarbersFilterToggle } from "@/components/ui/barbers-filter-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Scissors, Search, UserPlus } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 
 export default function AdminBarbers() {
-  const navigate = useNavigate();
   const [barberFilter, setBarberFilter] = useBarberFilter(); // Reusa o filtro global
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -77,121 +76,53 @@ export default function AdminBarbers() {
     updateBarberStatus.mutate({ id: barber.id, status });
   };
 
-  const handleLogout = () => {
-    navigate("/barbalogin");
-  };
-
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-gray-900 text-white py-4 px-6">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">Clube da Navalha</h1>
-          <Button variant="outline" onClick={handleLogout}>
-            Sair
-          </Button>
+    <div className="container mx-auto">
+      {/* Page header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Barbeiros Cadastrados</h1>
+          <p className="text-muted-foreground">
+            Gerencie os profissionais da sua barbearia
+          </p>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <aside className="hidden md:block w-64 bg-gray-800 text-white p-4">
-          <nav className="space-y-2">
-            <a
-              href="/admin/dashboard"
-              className="block px-4 py-2 rounded hover:bg-gray-700"
-            >
-              Dashboard
-            </a>
-            <a
-              href="/admin/services"
-              className="block px-4 py-2 rounded hover:bg-gray-700"
-            >
-              Gestão de Serviços
-            </a>
-            <a
-              href="/admin/products"
-              className="block px-4 py-2 rounded hover:bg-gray-700"
-            >
-              Gestão de Produtos
-            </a>
-            <a
-              href="/admin/barbeiros"
-              className="block px-4 py-2 rounded bg-gray-700"
-            >
-              <div className="flex items-center gap-2">
-                <Scissors className="h-4 w-4" />
-                Gestão de Barbeiros
-              </div>
-            </a>
-            <a
-              href="/admin/company"
-              className="block px-4 py-2 rounded hover:bg-gray-700"
-            >
-              Dados da Empresa
-            </a>
-          </nav>
-        </aside>
-
-        {/* Content */}
-        <main className="flex-1 p-6">
-          <div className="container mx-auto">
-            {/* Mobile menu */}
-            <div className="md:hidden mb-6">
-              <Button variant="outline" className="w-full flex justify-start">
-                <span>Menu</span>
-              </Button>
-            </div>
-
-            {/* Page header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-              <div>
-                <h1 className="text-2xl font-bold">Barbeiros Cadastrados</h1>
-                <p className="text-muted-foreground">
-                  Gerencie os profissionais da sua barbearia
-                </p>
-              </div>
-
-              {/* Filter toggle - reusa o componente existente */}
-              <div className="mt-4 md:mt-0 self-end">
-                <BarbersFilterToggle
-                  value={barberFilter}
-                  onValueChange={setBarberFilter}
-                  currentBarberId={currentUserId}
-                />
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col md:flex-row gap-3 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por nome ou especialidade..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleNewBarber}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                <span>Novo Barbeiro</span>
-              </Button>
-            </div>
-
-            {/* Barbers Table */}
-            <BarberTable
-              barbers={filteredBarbers}
-              onEdit={handleEditBarber}
-              onDelete={handleDeleteBarber}
-              onStatusChange={handleStatusChange}
-              isLoading={isLoading}
-              filteredByCurrentUser={barberFilter === "self"}
-            />
-          </div>
-        </main>
+        {/* Filter toggle - reusa o componente existente */}
+        <div className="mt-4 md:mt-0 self-end">
+          <BarbersFilterToggle
+            value={barberFilter}
+            onValueChange={setBarberFilter}
+            currentBarberId={currentUserId}
+          />
+        </div>
       </div>
+
+      {/* Actions */}
+      <div className="flex flex-col md:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome ou especialidade..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <Button onClick={handleNewBarber}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          <span>Novo Barbeiro</span>
+        </Button>
+      </div>
+
+      {/* Barbers Table */}
+      <BarberTable
+        barbers={filteredBarbers}
+        onEdit={handleEditBarber}
+        onDelete={handleDeleteBarber}
+        onStatusChange={handleStatusChange}
+        isLoading={isLoading}
+        filteredByCurrentUser={barberFilter === "self"}
+      />
 
       {/* Modals */}
       <BarberFormModal
