@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -207,7 +208,7 @@ const AdminDashboard = () => {
   const [period, setPeriod] = useState("daily");
   const [date, setDate] = useState<Date>(new Date());
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
-  const [showBilling, setShowBilling] = useState(true);
+  const [showBilling, setShowBilling] = useState(false); // Changed to false (hidden by default)
   const [barberFilter, setBarberFilter] = useBarberFilter("all", "dashboardBarberFilter");
   const navigate = useNavigate();
   
@@ -253,6 +254,14 @@ const AdminDashboard = () => {
             trend={currentKpiData.services.trend}
             footnote={currentKpiData.services.footnote}
             sparklineData={servicesSparklineDataByBarber[barberFilter]}
+            rightElement={
+              <BarbersFilterToggle
+                value={barberFilter}
+                onValueChange={setBarberFilter}
+                currentBarberId={currentBarberId}
+                compact={true}
+              />
+            }
           />
 
           <KpiCard
@@ -263,6 +272,14 @@ const AdminDashboard = () => {
             sparklineData={billingSparklineDataByBarber[barberFilter]}
             isPrivate={!showBilling}
             onToggleVisibility={() => setShowBilling(!showBilling)}
+            rightElement={
+              <BarbersFilterToggle
+                value={barberFilter}
+                onValueChange={setBarberFilter}
+                currentBarberId={currentBarberId}
+                compact={true}
+              />
+            }
           />
 
           <KpiCard
@@ -271,6 +288,14 @@ const AdminDashboard = () => {
             trend={currentKpiData.clients.trend}
             footnote={currentKpiData.clients.footnote}
             sparklineData={clientsSparklineDataByBarber[barberFilter]}
+            rightElement={
+              <BarbersFilterToggle
+                value={barberFilter}
+                onValueChange={setBarberFilter}
+                currentBarberId={currentBarberId}
+                compact={true}
+              />
+            }
           />
         </div>
 
@@ -363,8 +388,14 @@ const AdminDashboard = () => {
                   </Button>
                 </div>
               </div>
-              <CardDescription>
-                {format(calendarMonth, "MMMM yyyy")}
+              <CardDescription className="flex items-center justify-between">
+                <span>{format(calendarMonth, "MMMM yyyy")}</span>
+                <BarbersFilterToggle
+                  value={barberFilter}
+                  onValueChange={setBarberFilter}
+                  currentBarberId={currentBarberId}
+                  compact={true}
+                />
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -377,12 +408,8 @@ const AdminDashboard = () => {
                 modifiers={{
                   hasAppointment: daysWithAppointments
                 }}
-                modifiersStyles={{
-                  hasAppointment: { 
-                    fontWeight: 'bold', 
-                    backgroundColor: '#f8e3c5',
-                    color: '#1f2937'
-                  }
+                modifiersClassNames={{
+                  hasAppointment: "rdp-day_hasAppointment"
                 }}
               />
             </CardContent>
@@ -390,12 +417,22 @@ const AdminDashboard = () => {
           
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Agendamentos: {format(date, "dd/MM/yyyy")}</CardTitle>
-              <CardDescription>
-                {appointmentsForSelectedDate.length > 0 
-                  ? `${appointmentsForSelectedDate.length} serviços agendados neste dia` 
-                  : "Sem agendamentos para este dia"}
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Agendamentos: {format(date, "dd/MM/yyyy")}</CardTitle>
+                  <CardDescription>
+                    {appointmentsForSelectedDate.length > 0 
+                      ? `${appointmentsForSelectedDate.length} serviços agendados neste dia` 
+                      : "Sem agendamentos para este dia"}
+                  </CardDescription>
+                </div>
+                <BarbersFilterToggle
+                  value={barberFilter}
+                  onValueChange={setBarberFilter}
+                  currentBarberId={currentBarberId}
+                  compact={true}
+                />
+              </div>
             </CardHeader>
             <CardContent>
               {appointmentsForSelectedDate.length > 0 ? (

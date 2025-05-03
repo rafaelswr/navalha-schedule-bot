@@ -72,3 +72,10 @@
 [data-radix-menubar-trigger] {
   @apply hover:bg-gray-700 hover:text-white transition-colors;
 }
+
+/* Custom calendar styling for days with appointments */
+.rdp-day_hasAppointment:not(.rdp-day_outside) {
+  font-weight: bold;
+  background-color: #f8e3c5;
+  color: #1f2937;
+}
