@@ -10,6 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Eye, EyeOff, Scissors, Calendar as CalendarIcon, UsersIcon, LogOut, Store, FileText, Building, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addMonths, subMonths, isSameDay, addDays, subDays } from "date-fns";
+import { BarbersFilterToggle, BarberFilterValue } from "@/components/ui/barbers-filter-toggle";
+import { useBarberFilter } from "@/hooks/use-barber-filter";
 
 // Mock data for the dashboard
 const dailyData = [
@@ -45,6 +47,48 @@ const yearlyData = [
   { name: "2024", corte: 3200, barba: 2600, total: 5800 },
 ];
 
+// Mock per-barber data for filtering demonstration
+const dailyDataByBarber = {
+  "all": [
+    { name: "Seg", corte: 15, barba: 8, total: 23 },
+    { name: "Ter", corte: 18, barba: 12, total: 30 },
+    { name: "Qua", corte: 22, barba: 15, total: 37 },
+    { name: "Qui", corte: 25, barba: 20, total: 45 },
+    { name: "Sex", corte: 32, barba: 24, total: 56 },
+    { name: "Sáb", corte: 38, barba: 28, total: 66 },
+    { name: "Dom", corte: 12, barba: 5, total: 17 },
+  ],
+  "self": [
+    { name: "Seg", corte: 5, barba: 3, total: 8 },
+    { name: "Ter", corte: 6, barba: 4, total: 10 },
+    { name: "Qua", corte: 8, barba: 5, total: 13 },
+    { name: "Qui", corte: 7, barba: 6, total: 13 },
+    { name: "Sex", corte: 10, barba: 8, total: 18 },
+    { name: "Sáb", corte: 12, barba: 9, total: 21 },
+    { name: "Dom", corte: 4, barba: 2, total: 6 },
+  ]
+};
+
+const monthlyDataByBarber = {
+  "all": monthlyData,
+  "self": monthlyData.map(month => ({
+    ...month,
+    corte: Math.round(month.corte * 0.3),
+    barba: Math.round(month.barba * 0.3),
+    total: Math.round(month.total * 0.3)
+  }))
+};
+
+const yearlyDataByBarber = {
+  "all": yearlyData,
+  "self": yearlyData.map(year => ({
+    ...year,
+    corte: Math.round(year.corte * 0.3),
+    barba: Math.round(year.barba * 0.3),
+    total: Math.round(year.total * 0.3)
+  }))
+};
+
 // Mock recent appointments data
 const recentAppointments = [
   { cliente: "Ricardo Santos", servico: "Corte + Barba", data: "02/05/2025", hora: "14:30", valor: "25€" },
@@ -53,35 +97,55 @@ const recentAppointments = [
   { cliente: "André Martins", servico: "Pacote Premium", data: "02/05/2025", hora: "17:30", valor: "40€" },
 ];
 
-// Mock appointments data
-const appointmentsData = [
-  { date: new Date(2025, 4, 1), appointments: [
-    { cliente: "António Ribeiro", servico: "Corte + Barba", hora: "09:00", valor: "25€" },
-    { cliente: "Pedro Costa", servico: "Corte de Cabelo", hora: "11:30", valor: "15€" },
-    { cliente: "Rui Mendes", servico: "Barba", hora: "14:00", valor: "12€" },
-  ]},
-  { date: new Date(2025, 4, 2), appointments: [
-    { cliente: "João Silva", servico: "Corte + Barba", hora: "10:00", valor: "25€" },
-    { cliente: "Manuel Costa", servico: "Barba", hora: "11:00", valor: "12€" },
-    { cliente: "António Ferreira", servico: "Corte de Cabelo", hora: "12:00", valor: "15€" },
-    { cliente: "Pedro Santos", servico: "Tratamento Facial", hora: "14:00", valor: "20€" },
-    { cliente: "Carlos Lopes", servico: "Pacote Premium", hora: "15:30", valor: "40€" },
-  ]},
-  { date: new Date(2025, 4, 3), appointments: [
-    { cliente: "Miguel Ramos", servico: "Corte de Cabelo", hora: "09:30", valor: "15€" },
-    { cliente: "José Almeida", servico: "Barba", hora: "13:00", valor: "12€" },
-    { cliente: "Francisco Silva", servico: "Corte + Barba", hora: "16:30", valor: "25€" },
-  ]},
-  { date: new Date(2025, 3, 28), appointments: [
-    { cliente: "Duarte Fonseca", servico: "Corte de Cabelo", hora: "10:00", valor: "15€" },
-    { cliente: "Tomás Costa", servico: "Pacote Premium", hora: "14:00", valor: "40€" },
-  ]},
-  { date: new Date(2025, 3, 29), appointments: [
-    { cliente: "Paulo Marques", servico: "Barba", hora: "09:00", valor: "12€" },
-    { cliente: "Jorge Mendes", servico: "Corte + Barba", hora: "11:30", valor: "25€" },
-    { cliente: "Fernando Sousa", servico: "Tratamento Facial", hora: "15:00", valor: "20€" },
-  ]},
-];
+// Mock appointments data by barber
+const appointmentsDataByBarber = {
+  "all": [
+    { date: new Date(2025, 4, 1), appointments: [
+      { cliente: "António Ribeiro", servico: "Corte + Barba", hora: "09:00", valor: "25€" },
+      { cliente: "Pedro Costa", servico: "Corte de Cabelo", hora: "11:30", valor: "15€" },
+      { cliente: "Rui Mendes", servico: "Barba", hora: "14:00", valor: "12€" },
+    ]},
+    { date: new Date(2025, 4, 2), appointments: [
+      { cliente: "João Silva", servico: "Corte + Barba", hora: "10:00", valor: "25€" },
+      { cliente: "Manuel Costa", servico: "Barba", hora: "11:00", valor: "12€" },
+      { cliente: "António Ferreira", servico: "Corte de Cabelo", hora: "12:00", valor: "15€" },
+      { cliente: "Pedro Santos", servico: "Tratamento Facial", hora: "14:00", valor: "20€" },
+      { cliente: "Carlos Lopes", servico: "Pacote Premium", hora: "15:30", valor: "40€" },
+    ]},
+    { date: new Date(2025, 4, 3), appointments: [
+      { cliente: "Miguel Ramos", servico: "Corte de Cabelo", hora: "09:30", valor: "15€" },
+      { cliente: "José Almeida", servico: "Barba", hora: "13:00", valor: "12€" },
+      { cliente: "Francisco Silva", servico: "Corte + Barba", hora: "16:30", valor: "25€" },
+    ]},
+    { date: new Date(2025, 3, 28), appointments: [
+      { cliente: "Duarte Fonseca", servico: "Corte de Cabelo", hora: "10:00", valor: "15€" },
+      { cliente: "Tomás Costa", servico: "Pacote Premium", hora: "14:00", valor: "40€" },
+    ]},
+    { date: new Date(2025, 3, 29), appointments: [
+      { cliente: "Paulo Marques", servico: "Barba", hora: "09:00", valor: "12€" },
+      { cliente: "Jorge Mendes", servico: "Corte + Barba", hora: "11:30", valor: "25€" },
+      { cliente: "Fernando Sousa", servico: "Tratamento Facial", hora: "15:00", valor: "20€" },
+    ]},
+  ],
+  "self": [
+    { date: new Date(2025, 4, 1), appointments: [
+      { cliente: "António Ribeiro", servico: "Corte + Barba", hora: "09:00", valor: "25€" },
+    ]},
+    { date: new Date(2025, 4, 2), appointments: [
+      { cliente: "João Silva", servico: "Corte + Barba", hora: "10:00", valor: "25€" },
+      { cliente: "Manuel Costa", servico: "Barba", hora: "11:00", valor: "12€" },
+    ]},
+    { date: new Date(2025, 4, 3), appointments: [
+      { cliente: "Miguel Ramos", servico: "Corte de Cabelo", hora: "09:30", valor: "15€" },
+    ]},
+    { date: new Date(2025, 3, 28), appointments: [
+      { cliente: "Duarte Fonseca", servico: "Corte de Cabelo", hora: "10:00", valor: "15€" },
+    ]},
+    { date: new Date(2025, 3, 29), appointments: [
+      { cliente: "Paulo Marques", servico: "Barba", hora: "09:00", valor: "12€" },
+    ]},
+  ]
+};
 
 // Generate sparkline data (last 7 days)
 const generateSparklineData = (startValue: number, volatility: number, trend: "up" | "down" | "stable" = "up") => {
@@ -106,23 +170,59 @@ const generateSparklineData = (startValue: number, volatility: number, trend: "u
   return data;
 };
 
-// Generate sparkline data sets
-const servicesSparklineData = generateSparklineData(18, 5, "up");
-const billingSparklineData = generateSparklineData(90, 15, "up");
-const clientsSparklineData = generateSparklineData(120, 3, "up");
+// Generate sparkline data sets by barber
+const servicesSparklineDataByBarber = {
+  "all": generateSparklineData(18, 5, "up"),
+  "self": generateSparklineData(6, 2, "up")
+};
+
+const billingSparklineDataByBarber = {
+  "all": generateSparklineData(90, 15, "up"),
+  "self": generateSparklineData(30, 5, "up")
+};
+
+const clientsSparklineDataByBarber = {
+  "all": generateSparklineData(120, 3, "up"),
+  "self": generateSparklineData(40, 2, "up")
+};
+
+// KPI data by filter
+const kpiDataByBarber = {
+  "all": {
+    services: { value: "23", trend: { value: 15, isPositive: true, label: "+15% vs ontem" }, footnote: "15 cortes / 8 barbas" },
+    billing: { value: "3.450€", trend: { value: 8, isPositive: true, label: "+8% vs mês anterior" }, footnote: "Média diária: 115€" },
+    clients: { value: "128", trend: { value: 12, isPositive: true, label: "+12 novos este mês" }, footnote: "78% taxa de retorno" }
+  },
+  "self": {
+    services: { value: "8", trend: { value: 10, isPositive: true, label: "+10% vs ontem" }, footnote: "5 cortes / 3 barbas" },
+    billing: { value: "1.125€", trend: { value: 5, isPositive: true, label: "+5% vs mês anterior" }, footnote: "Média diária: 38€" },
+    clients: { value: "42", trend: { value: 4, isPositive: true, label: "+4 novos este mês" }, footnote: "82% taxa de retorno" }
+  }
+};
 
 const AdminDashboard = () => {
   const [period, setPeriod] = useState("daily");
   const [date, setDate] = useState<Date>(new Date());
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
   const [showBilling, setShowBilling] = useState(true);
+  const [barberFilter, setBarberFilter] = useBarberFilter("all", "dashboardBarberFilter");
   const navigate = useNavigate();
+
+  // Mock current barber ID (in a real app, this would come from auth context)
+  const currentBarberId = "1";
 
   const handleLogout = () => {
     navigate("/barbalogin");
   };
 
-  const appointmentsForSelectedDate = appointmentsData.find(item => 
+  // Use filtered data based on barber filter selection
+  const currentAppointmentsData = appointmentsDataByBarber[barberFilter];
+  const currentDailyData = dailyDataByBarber[barberFilter];
+  const currentMonthlyData = monthlyDataByBarber[barberFilter];
+  const currentYearlyData = yearlyDataByBarber[barberFilter];
+  const currentKpiData = kpiDataByBarber[barberFilter];
+  
+  const appointmentsForSelectedDate = currentAppointmentsData.find(item => 
     isSameDay(item.date, date)
   )?.appointments || [];
 
@@ -134,7 +234,7 @@ const AdminDashboard = () => {
     setCalendarMonth(prev => addMonths(prev, 1));
   };
 
-  const daysWithAppointments = appointmentsData.map(item => item.date);
+  const daysWithAppointments = currentAppointmentsData.map(item => item.date);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -159,40 +259,28 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <KpiCard
             title="Serviços Hoje"
-            value="23"
-            trend={{
-              value: 15,
-              label: "+15% vs ontem",
-              isPositive: true
-            }}
-            footnote="15 cortes / 8 barbas"
-            sparklineData={servicesSparklineData}
+            value={currentKpiData.services.value}
+            trend={currentKpiData.services.trend}
+            footnote={currentKpiData.services.footnote}
+            sparklineData={servicesSparklineDataByBarber[barberFilter]}
           />
 
           <KpiCard
             title="Faturação Mensal"
-            value="3.450€"
-            trend={{
-              value: 8,
-              label: "+8% vs mês anterior",
-              isPositive: true
-            }}
-            footnote="Média diária: 115€"
-            sparklineData={billingSparklineData}
+            value={currentKpiData.billing.value}
+            trend={currentKpiData.billing.trend}
+            footnote={currentKpiData.billing.footnote}
+            sparklineData={billingSparklineDataByBarber[barberFilter]}
             isPrivate={!showBilling}
             onToggleVisibility={() => setShowBilling(!showBilling)}
           />
 
           <KpiCard
             title="Clientes Fidelizados"
-            value="128"
-            trend={{
-              value: 12,
-              label: "+12 novos este mês",
-              isPositive: true
-            }}
-            footnote="78% taxa de retorno"
-            sparklineData={clientsSparklineData}
+            value={currentKpiData.clients.value}
+            trend={currentKpiData.clients.trend}
+            footnote={currentKpiData.clients.footnote}
+            sparklineData={clientsSparklineDataByBarber[barberFilter]}
           />
         </div>
 
@@ -289,158 +377,136 @@ const AdminDashboard = () => {
         </div>
 
         {/* Admin Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate("/admin/services")}>
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <FileText className="h-6 w-6 text-navalha-burgundy" />
-                <CardTitle>Gestão de Serviços</CardTitle>
-              </div>
-              <CardDescription>
-                Adicione, edite ou remova serviços da barbearia
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Gira os serviços exibidos na página principal e na página de serviços.</p>
-            </CardContent>
-          </Card>
+        {/* ... keep existing code (Admin Navigation Cards section) */}
 
-          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate("/admin/products")}>
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Store className="h-6 w-6 text-navalha-burgundy" />
-                <CardTitle>Gestão de Produtos</CardTitle>
-              </div>
-              <CardDescription>
-                Adicione, edite ou remova produtos da loja online
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Gira os produtos disponíveis na loja online do Clube da Navalha.</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate("/admin/company")}>
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Building className="h-6 w-6 text-navalha-burgundy" />
-                <CardTitle>Dados da Empresa</CardTitle>
-              </div>
-              <CardDescription>
-                Gerencie as informações de contacto e localização
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Atualize endereço, contactos, redes sociais e localização no mapa.</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="daily" className="mb-8" onValueChange={setPeriod}>
-          <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col space-y-4 mb-8">
+          <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Estatísticas de Serviços</h2>
-            <TabsList>
+            <BarbersFilterToggle
+              value={barberFilter}
+              onValueChange={setBarberFilter}
+              currentBarberId={currentBarberId}
+              compact={false}
+            />
+          </div>
+          
+          <Tabs defaultValue="daily" onValueChange={setPeriod}>
+            <TabsList className="grid w-full max-w-md grid-cols-3">
               <TabsTrigger value="daily">Diário</TabsTrigger>
               <TabsTrigger value="monthly">Mensal</TabsTrigger>
               <TabsTrigger value="yearly">Anual</TabsTrigger>
             </TabsList>
-          </div>
-          
-          <TabsContent value="daily">
-            <Card className="mb-12"> {/* Increased margin-bottom from mb-8 to mb-12 */}
-              <CardHeader>
-                <CardTitle>Serviços - Última Semana</CardTitle>
-                <CardDescription>
-                  Distribuição de serviços por dia da semana
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-auto"> {/* Decreased height from 350px to 300px */}
-                <ChartContainer
-                  config={{
-                    corte: { label: "Cortes", color: "#9b87f5" },
-                    barba: { label: "Barbas", color: "#7E69AB" },
-                    total: { label: "Total", color: "#1A1F2C" },
-                  }}
-                >
-                  <BarChart data={dailyData}>
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Bar dataKey="corte" fill="#9b87f5" name="Cortes" />
-                    <Bar dataKey="barba" fill="#7E69AB" name="Barbas" />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="monthly">
-            <Card className="mb-12"> {/* Increased margin-bottom from mb-8 to mb-12 */}
-              <CardHeader>
-                <CardTitle>Serviços - Este Ano</CardTitle>
-                <CardDescription>
-                  Distribuição de serviços por mês
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-auto"> {/* Decreased height from 350px to 300px */}
-                <ChartContainer
-                  config={{
-                    corte: { label: "Cortes", color: "#9b87f5" },
-                    barba: { label: "Barbas", color: "#7E69AB" },
-                    total: { label: "Total", color: "#1A1F2C" },
-                  }}
-                >
-                  <LineChart data={monthlyData}>
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Line type="monotone" dataKey="corte" stroke="#9b87f5" name="Cortes" />
-                    <Line type="monotone" dataKey="barba" stroke="#7E69AB" name="Barbas" />
-                    <Line type="monotone" dataKey="total" stroke="#1A1F2C" name="Total" />
-                  </LineChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="yearly">
-            <Card className="mb-12"> {/* Increased margin-bottom from mb-8 to mb-12 */}
-              <CardHeader>
-                <CardTitle>Serviços - Histórico Anual</CardTitle>
-                <CardDescription>
-                  Evolução de serviços por ano
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-auto"> {/* Decreased height from 350px to 300px */}
-                <ChartContainer
-                  config={{
-                    corte: { label: "Cortes", color: "#9b87f5" },
-                    barba: { label: "Barbas", color: "#7E69AB" },
-                    total: { label: "Total", color: "#1A1F2C" },
-                  }}
-                >
-                  <BarChart data={yearlyData}>
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Bar dataKey="corte" fill="#9b87f5" name="Cortes" />
-                    <Bar dataKey="barba" fill="#7E69AB" name="Barbas" />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+            
+            <TabsContent value="daily">
+              <Card className="mb-12">
+                <CardHeader>
+                  <CardTitle>Serviços - Última Semana</CardTitle>
+                  <CardDescription>
+                    Distribuição de serviços por dia da semana
+                    {barberFilter === "self" ? " (somente meus atendimentos)" : " (todos os barbeiros)"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="h-auto">
+                  <ChartContainer
+                    config={{
+                      corte: { label: "Cortes", color: "#9b87f5" },
+                      barba: { label: "Barbas", color: "#7E69AB" },
+                      total: { label: "Total", color: "#1A1F2C" },
+                    }}
+                  >
+                    <BarChart data={currentDailyData}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Bar dataKey="corte" fill="#9b87f5" name="Cortes" />
+                      <Bar dataKey="barba" fill="#7E69AB" name="Barbas" />
+                    </BarChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="monthly">
+              <Card className="mb-12">
+                <CardHeader>
+                  <CardTitle>Serviços - Este Ano</CardTitle>
+                  <CardDescription>
+                    Distribuição de serviços por mês
+                    {barberFilter === "self" ? " (somente meus atendimentos)" : " (todos os barbeiros)"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="h-auto">
+                  <ChartContainer
+                    config={{
+                      corte: { label: "Cortes", color: "#9b87f5" },
+                      barba: { label: "Barbas", color: "#7E69AB" },
+                      total: { label: "Total", color: "#1A1F2C" },
+                    }}
+                  >
+                    <LineChart data={currentMonthlyData}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Line type="monotone" dataKey="corte" stroke="#9b87f5" name="Cortes" />
+                      <Line type="monotone" dataKey="barba" stroke="#7E69AB" name="Barbas" />
+                      <Line type="monotone" dataKey="total" stroke="#1A1F2C" name="Total" />
+                    </LineChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="yearly">
+              <Card className="mb-12">
+                <CardHeader>
+                  <CardTitle>Serviços - Histórico Anual</CardTitle>
+                  <CardDescription>
+                    Evolução de serviços por ano
+                    {barberFilter === "self" ? " (somente meus atendimentos)" : " (todos os barbeiros)"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="h-auto">
+                  <ChartContainer
+                    config={{
+                      corte: { label: "Cortes", color: "#9b87f5" },
+                      barba: { label: "Barbas", color: "#7E69AB" },
+                      total: { label: "Total", color: "#1A1F2C" },
+                    }}
+                  >
+                    <BarChart data={currentYearlyData}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Bar dataKey="corte" fill="#9b87f5" name="Cortes" />
+                      <Bar dataKey="barba" fill="#7E69AB" name="Barbas" />
+                    </BarChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Agendamentos Recentes</CardTitle>
-            <CardDescription>
-              Últimos serviços agendados para hoje
-            </CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Agendamentos Recentes</CardTitle>
+                <CardDescription>
+                  Últimos serviços agendados para hoje
+                  {barberFilter === "self" ? " (somente meus atendimentos)" : ""}
+                </CardDescription>
+              </div>
+              <BarbersFilterToggle
+                value={barberFilter}
+                onValueChange={setBarberFilter}
+                currentBarberId={currentBarberId}
+                compact={true}
+              />
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
