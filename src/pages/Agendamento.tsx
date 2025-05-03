@@ -27,16 +27,7 @@ const Agendamento = () => {
       
       <section className="py-16 bg-gray-100">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              Marca o teu <span className="text-navalha-burgundy">Horário</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Escolhe a data e hora que melhor se adequam à tua agenda. A confirmação será enviada para o teu e-mail.
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="max-w-3xl mx-auto">
             <AppointmentForm />
           </div>
         </div>
