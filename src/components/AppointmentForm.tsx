@@ -2,19 +2,23 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, User, Mail, Phone, Clock } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { 
   Form, 
   FormControl, 
   FormField, 
   FormItem, 
+  FormLabel, 
   FormMessage 
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { 
   Select, 
   SelectContent, 
@@ -28,6 +32,7 @@ import {
   PopoverTrigger 
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBarbers } from "@/hooks/use-barbers";
 
 const FormSchema = z.object({
@@ -111,55 +116,55 @@ export const AppointmentForm = () => {
   };
 
   return (
-    <div className="bg-gray-100 shadow-md rounded-lg overflow-hidden">
-      <div className="bg-black p-5 text-center">
-        <h2 className="text-white text-2xl font-serif">Marcar Agendamento</h2>
-        <p className="text-gray-300 text-sm mt-1">
+    <Card className="w-full max-w-lg mx-auto">
+      <CardHeader className="bg-navalha-black text-white">
+        <CardTitle>Marcar Agendamento</CardTitle>
+        <CardDescription className="text-gray-300">
           Reserva o teu horário para um corte ou tratamento de barba
-        </p>
-      </div>
-      
-      <div className="p-6">
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pt-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input placeholder="O teu nome completo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>E-mail</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                        <input
-                          {...field}
-                          placeholder="O teu nome completo"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                      </div>
+                      <Input placeholder="O teu e-mail" type="email" {...field} />
                     </FormControl>
-                    <FormMessage className="ml-3 text-xs" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
               <FormField
                 control={form.control}
-                name="email"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                        <input
-                          {...field}
-                          type="email"
-                          placeholder="O teu e-mail"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                      </div>
+                      <Input placeholder="Telefone para contacto" {...field} />
                     </FormControl>
-                    <FormMessage className="ml-3 text-xs" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -168,36 +173,15 @@ export const AppointmentForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                        <input
-                          {...field}
-                          placeholder="Telefone para contacto"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage className="ml-3 text-xs" />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="service"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Serviço</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <div className="relative">
-                          <SelectTrigger className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                            <SelectValue placeholder="Seleciona o serviço desejado" />
-                          </SelectTrigger>
-                        </div>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleciona o serviço desejado" />
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="corte">Corte de Cabelo</SelectItem>
@@ -206,25 +190,22 @@ export const AppointmentForm = () => {
                         <SelectItem value="premium">Tratamento Premium</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage className="ml-3 text-xs" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="barber"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Barbeiro</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <div className="relative">
-                          <SelectTrigger className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                            <SelectValue placeholder="Seleciona o barbeiro" />
-                          </SelectTrigger>
-                        </div>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleciona o barbeiro" />
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {isLoading ? (
@@ -238,35 +219,36 @@ export const AppointmentForm = () => {
                         )}
                       </SelectContent>
                     </Select>
-                    <FormMessage className="ml-3 text-xs" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="date"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Data</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
-                          <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                            <button
-                              type="button"
-                              className={cn(
-                                "w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full text-left focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent",
-                                !field.value && "text-gray-500"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "EEEE, dd/MM/yyyy", { locale: ptBR })
-                              ) : (
-                                <span>Escolhe uma data</span>
-                              )}
-                            </button>
-                          </div>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "EEEE, dd/MM/yyyy", { locale: ptBR })
+                            ) : (
+                              <span>Escolhe uma data</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -286,54 +268,53 @@ export const AppointmentForm = () => {
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormMessage className="ml-3 text-xs" />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hora</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleciona um horário" />
+                          <Clock className="h-4 w-4 opacity-50" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableTimeSlots.length > 0 ? (
+                          availableTimeSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            Sem horários disponíveis
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="time"
-              render={({ field }) => (
-                <FormItem>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                        <SelectTrigger className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                          <SelectValue placeholder="Seleciona um horário" />
-                        </SelectTrigger>
-                      </div>
-                    </FormControl>
-                    <SelectContent>
-                      {availableTimeSlots.length > 0 ? (
-                        availableTimeSlots.map((slot) => (
-                          <SelectItem key={slot} value={slot}>
-                            {slot}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="none" disabled>
-                          Sem horários disponíveis
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="ml-3 text-xs" />
-                </FormItem>
-              )}
-            />
-
-            <button 
+            <Button 
               type="submit" 
-              className="w-full py-3 mt-4 bg-navalha-gold text-black font-bold rounded-full hover:bg-[#c19b27] transition-all shadow-md hover:shadow-lg"
+              className="w-full bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white"
             >
               Confirmar Marcação
-            </button>
+            </Button>
           </form>
         </Form>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
