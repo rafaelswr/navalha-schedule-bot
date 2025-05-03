@@ -44,8 +44,7 @@ export const GoalProgressCard = ({
         
         <Progress 
           value={percentage} 
-          className="h-2" 
-          indicatorClassName={cn("transition-colors", statusColor)}
+          className={cn("h-2", statusColor)}
         />
         
         <div className="flex justify-between items-center text-sm">
