@@ -18,6 +18,7 @@ import ShopDashboard from "./pages/ShopDashboard";
 import BarberDashboard from "./pages/BarberDashboard";
 import Servicos from "./pages/Servicos";
 import Loja from "./pages/Loja";
+import Agendamento from "./pages/Agendamento";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/servicos" element={<Servicos />} />
           <Route path="/loja" element={<Loja />} />
+          <Route path="/agendamento" element={<Agendamento />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
