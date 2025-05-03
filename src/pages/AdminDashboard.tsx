@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,10 +8,13 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
-import { Eye, EyeOff, Scissors, Calendar as CalendarIcon, UsersIcon, LogOut, Store, FileText, Building, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, EyeOff, Scissors, Calendar as CalendarIcon, Users, LogOut, Store, FileText, Building, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addMonths, subMonths, isSameDay, addDays, subDays } from "date-fns";
 import { BarbersFilterToggle, BarberFilterValue } from "@/components/ui/barbers-filter-toggle";
 import { useBarberFilter } from "@/hooks/use-barber-filter";
+import { useBarbers } from "@/hooks/use-barbers";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data for the dashboard
 const dailyData = [
@@ -208,6 +210,10 @@ const AdminDashboard = () => {
   const [showBilling, setShowBilling] = useState(true);
   const [barberFilter, setBarberFilter] = useBarberFilter("all", "dashboardBarberFilter");
   const navigate = useNavigate();
+  
+  // Get barber data from our hook instead of mock data
+  const { barbers, isLoading } = useBarbers();
+  const activeBarbers = barbers.filter(barber => barber.status === "active");
 
   // Mock current barber ID (in a real app, this would come from auth context)
   const currentBarberId = "1";
@@ -239,23 +245,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="bg-navalha-black text-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Scissors className="h-6 w-6 text-navalha-gold" />
-            <h1 className="text-xl font-bold">Clube da Navalha | Admin</h1>
-          </div>
-          <Button 
-            variant="ghost" 
-            className="text-white hover:text-navalha-gold"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-5 w-5 mr-2" />
-            Sair
-          </Button>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <KpiCard
@@ -283,6 +272,70 @@ const AdminDashboard = () => {
             footnote={currentKpiData.clients.footnote}
             sparklineData={clientsSparklineDataByBarber[barberFilter]}
           />
+        </div>
+
+        {/* Barbeiros Ativos Section */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle className="text-xl">Barbeiros Ativos</CardTitle>
+                <CardDescription>
+                  {activeBarbers.length} barbeiros ativos na equipe
+                </CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-sm"
+                onClick={() => navigate('/admin/barbeiros')}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Gerir Barbeiros
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4">
+                {isLoading ? (
+                  <div className="w-full text-center py-4">Carregando barbeiros...</div>
+                ) : activeBarbers.length > 0 ? (
+                  activeBarbers.map((barber) => (
+                    <Card key={barber.id} className="w-full md:w-[calc(33.333%-1rem)] bg-white border border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-4">
+                          <Avatar className="h-12 w-12 border-2 border-navalha-gold">
+                            <AvatarImage src={barber.photoUrl} alt={barber.name} />
+                            <AvatarFallback>{barber.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-medium text-lg">{barber.name}</h3>
+                            <p className="text-sm text-gray-500">{barber.specialties.join(", ")}</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between">
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+                            Ativo
+                          </Badge>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => navigate(`/admin/barbeiros?edit=${barber.id}`)}
+                            className="h-8 text-sm"
+                          >
+                            Ver Perfil
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="w-full text-center py-4">
+                    Não há barbeiros ativos. <Button variant="link" onClick={() => navigate('/admin/barbeiros')}>Adicionar barbeiros</Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Calendar and Appointments Section */}
