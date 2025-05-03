@@ -1,15 +1,15 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/kpi-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
 import { Eye, EyeOff, Scissors, Calendar as CalendarIcon, UsersIcon, LogOut, Store, FileText, Building, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, addMonths, subMonths, isSameDay } from "date-fns";
+import { format, addMonths, subMonths, isSameDay, addDays, subDays } from "date-fns";
 
 // Mock data for the dashboard
 const dailyData = [
@@ -83,6 +83,34 @@ const appointmentsData = [
   ]},
 ];
 
+// Generate sparkline data (last 7 days)
+const generateSparklineData = (startValue: number, volatility: number, trend: "up" | "down" | "stable" = "up") => {
+  const today = new Date();
+  const data = [];
+  let currentValue = startValue;
+  
+  for (let i = 6; i >= 0; i--) {
+    const date = subDays(today, i);
+    // Apply trend with some random fluctuation
+    const changeDirection = Math.random() > 0.3 ? (trend === "up" ? 1 : trend === "down" ? -1 : (Math.random() > 0.5 ? 1 : -1)) : (Math.random() > 0.5 ? 1 : -1);
+    const change = changeDirection * Math.random() * volatility;
+    currentValue += change;
+    currentValue = Math.max(0, currentValue); // Ensure no negative values
+    
+    data.push({
+      date: date,
+      value: Math.round(currentValue * 10) / 10, // Round to one decimal place
+    });
+  }
+  
+  return data;
+};
+
+// Generate sparkline data sets
+const servicesSparklineData = generateSparklineData(18, 5, "up");
+const billingSparklineData = generateSparklineData(90, 15, "up");
+const clientsSparklineData = generateSparklineData(120, 3, "up");
+
 const AdminDashboard = () => {
   const [period, setPeriod] = useState("daily");
   const [date, setDate] = useState<Date>(new Date());
@@ -129,64 +157,43 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Serviços Hoje</CardTitle>
-              <div className="flex items-baseline justify-between">
-                <CardDescription className="text-3xl font-bold">23</CardDescription>
-                <CardDescription className="text-emerald-500 text-sm font-medium">+15% vs ontem</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xs text-muted-foreground">
-                15 cortes / 8 barbas
-              </div>
-            </CardContent>
-          </Card>
+          <KpiCard
+            title="Serviços Hoje"
+            value="23"
+            trend={{
+              value: 15,
+              label: "+15% vs ontem",
+              isPositive: true
+            }}
+            footnote="15 cortes / 8 barbas"
+            sparklineData={servicesSparklineData}
+          />
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
-                <span>Faturação Mensal</span>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-5 w-5 rounded-full"
-                  onClick={() => setShowBilling(!showBilling)}
-                >
-                  {showBilling ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </CardTitle>
-              <div className="flex items-baseline justify-between">
-                <CardDescription className="text-3xl font-bold">
-                  {showBilling ? "3.450€" : "****"}
-                </CardDescription>
-                <CardDescription className="text-emerald-500 text-sm font-medium">
-                  {showBilling ? "+8% vs mês anterior" : "**"}
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xs text-muted-foreground">
-                {showBilling ? "Média diária: 115€" : "Média diária: **€"}
-              </div>
-            </CardContent>
-          </Card>
+          <KpiCard
+            title="Faturação Mensal"
+            value="3.450€"
+            trend={{
+              value: 8,
+              label: "+8% vs mês anterior",
+              isPositive: true
+            }}
+            footnote="Média diária: 115€"
+            sparklineData={billingSparklineData}
+            isPrivate={!showBilling}
+            onToggleVisibility={() => setShowBilling(!showBilling)}
+          />
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Clientes Fidelizados</CardTitle>
-              <div className="flex items-baseline justify-between">
-                <CardDescription className="text-3xl font-bold">128</CardDescription>
-                <CardDescription className="text-emerald-500 text-sm font-medium">+12 novos este mês</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xs text-muted-foreground">
-                78% taxa de retorno
-              </div>
-            </CardContent>
-          </Card>
+          <KpiCard
+            title="Clientes Fidelizados"
+            value="128"
+            trend={{
+              value: 12,
+              label: "+12 novos este mês",
+              isPositive: true
+            }}
+            footnote="78% taxa de retorno"
+            sparklineData={clientsSparklineData}
+          />
         </div>
 
         {/* Calendar and Appointments Section */}
