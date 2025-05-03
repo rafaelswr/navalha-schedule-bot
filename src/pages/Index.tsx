@@ -20,6 +20,17 @@ const Index = () => {
     .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
     .slice(0, 3);
 
+  // Update the beard service image if it's broken
+  const updatedServices = topServices.map(service => {
+    if (service.title === "Barba") {
+      return {
+        ...service,
+        imagePath: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"
+      };
+    }
+    return service;
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -38,7 +49,7 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {topServices.map((service) => (
+            {updatedServices.map((service) => (
               <ServiceCard key={service.id} {...service} />
             ))}
           </div>

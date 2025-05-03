@@ -20,10 +20,20 @@ export const FeaturedProducts = () => {
   const [api, setApi] = useState<CarouselApi | null>(null);
   
   // Get featured products, or top 4 if not enough featured
+  // Also fix any broken image paths
   const featuredProducts = products
     .filter(product => product.featured)
     .concat(products.filter(product => !product.featured))
-    .slice(0, 4);
+    .slice(0, 4)
+    .map(product => {
+      if (product.name === "Óleo para Barba" || product.name.toLowerCase().includes("óleo")) {
+        return {
+          ...product,
+          imagePath: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"
+        };
+      }
+      return product;
+    });
 
   // Update current slide index when carousel changes
   const handleApiChange = (api: CarouselApi | null) => {
@@ -93,4 +103,3 @@ export const FeaturedProducts = () => {
     </section>
   );
 };
-
