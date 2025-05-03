@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Navbar = () => {
@@ -30,8 +30,9 @@ export const Navbar = () => {
           <Link to="/agendamento" className="hover:text-navalha-gold transition-colors">
             Agendamento
           </Link>
-          <Link to="/contactos" className="hover:text-navalha-gold transition-colors">
-            Contactos
+          <Link to="/admin/login" className="hover:text-navalha-gold transition-colors flex items-center gap-1">
+            <UserRound size={18} />
+            Login
           </Link>
           <Button className="bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white transition-colors" asChild>
             <Link to="/agendamento">Marcar Agora</Link>
@@ -82,11 +83,12 @@ export const Navbar = () => {
               Agendamento
             </Link>
             <Link 
-              to="/contactos" 
-              className="hover:text-navalha-gold transition-colors py-2"
+              to="/admin/login" 
+              className="hover:text-navalha-gold transition-colors py-2 flex items-center gap-1"
               onClick={() => setIsMenuOpen(false)}
             >
-              Contactos
+              <UserRound size={18} />
+              Login
             </Link>
             <Button 
               className="bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white transition-colors w-full"
