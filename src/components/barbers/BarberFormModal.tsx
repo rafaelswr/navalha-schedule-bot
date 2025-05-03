@@ -1,303 +1,280 @@
 
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Barber, BarberFormData } from "@/types/barber";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// Lista de especialidades disponíveis
-const SPECIALTIES = [
-  "Corte Clássico",
-  "Corte Moderno",
-  "Corte Feminino",
-  "Barba",
-  "Tratamentos Capilares",
-  "Coloração",
-  "Penteados",
-];
-
-// Schema para validação do formulário
-const barberFormSchema = z.object({
-  name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
-  email: z.string().email({ message: "Email inválido" }),
-  phone: z.string().min(8, { message: "Telefone deve ter pelo menos 8 caracteres" }),
-  specialties: z.array(z.string()).min(1, { message: "Selecione pelo menos uma especialidade" }),
-  status: z.enum(["active", "inactive"]),
-  password: z.string().optional(),
-});
+import { Switch } from "@/components/ui/switch";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Barber, BarberFormData } from "@/types/barber";
+import { Badge } from "../ui/badge";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface BarberFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: BarberFormData) => void;
-  barber?: Barber;
+  barber?: Barber | null;
+  onSubmit: (data: BarberFormData, barberId?: string) => void;
+  isSubmitting?: boolean;
 }
 
-export function BarberFormModal({
-  open,
-  onOpenChange,
-  onSubmit,
-  barber,
+const specialtyOptions = [
+  { label: "Corte Masculino", value: "corte-masculino" },
+  { label: "Barba", value: "barba" },
+  { label: "Coloração", value: "coloracao" },
+  { label: "Tratamento Capilar", value: "tratamento-capilar" },
+  { label: "Relaxamento", value: "relaxamento" },
+  { label: "Design de Sobrancelhas", value: "design-sobrancelhas" },
+];
+
+export function BarberFormModal({ 
+  open, 
+  onOpenChange, 
+  barber, 
+  onSubmit, 
+  isSubmitting = false 
 }: BarberFormModalProps) {
-  const isEditing = !!barber;
-  
-  // Inicializa o formulário com react-hook-form e zod
-  const form = useForm<z.infer<typeof barberFormSchema>>({
-    resolver: zodResolver(barberFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      specialties: [],
-      status: "active" as const,
-      password: "",
-    },
-  });
-  
-  // Preenche o formulário quando estiver editando um barbeiro
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [specialties, setSpecialties] = useState<string[]>([]);
+  const [status, setStatus] = useState<"active" | "inactive">("active");
+  const [password, setPassword] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Reset form when modal opens/closes or barber changes
   useEffect(() => {
-    if (barber) {
-      form.reset({
-        name: barber.name,
-        email: barber.email,
-        phone: barber.phone,
-        specialties: barber.specialties,
-        status: barber.status,
-        password: "", // Não preencher senha ao editar
-      });
-    } else {
-      form.reset({
-        name: "",
-        email: "",
-        phone: "",
-        specialties: [],
-        status: "active" as const,
-        password: "",
-      });
+    if (open && barber) {
+      setName(barber.name);
+      setEmail(barber.email);
+      setPhone(barber.phone);
+      setSpecialties(barber.specialties);
+      setStatus(barber.status);
+      setPassword("");
+      setPhoto(null);
+      setPreviewUrl(barber.photoUrl);
+      setErrors({});
+    } else if (open && !barber) {
+      // New barber - reset form
+      setName("");
+      setEmail("");
+      setPhone("");
+      setSpecialties([]);
+      setStatus("active");
+      setPassword("");
+      setPhoto(null);
+      setPreviewUrl("");
+      setErrors({});
     }
-  }, [barber, form]);
-  
-  // Função para lidar com o envio do formulário
-  const handleSubmit = (data: z.infer<typeof barberFormSchema>) => {
-    // Se a senha estiver vazia na edição, não inclua no payload
-    if (isEditing && !data.password) {
-      const { password, ...restData } = data;
-      onSubmit({
-        ...restData,
-        photoUrl: barber?.photoUrl, // Mantém a foto atual ao editar
-      });
-    } else {
-      onSubmit(data);
+  }, [open, barber]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.match(/image\/(jpeg|jpg|png|webp)/)) {
+      toast.error("Formato de imagem inválido. Use JPEG, PNG ou WebP.");
+      return;
     }
-    
-    onOpenChange(false);
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      toast.error("A imagem deve ter menos de 5MB");
+      return;
+    }
+
+    setPhoto(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
-  
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!name.trim()) newErrors.name = "Nome é obrigatório";
+    if (!email.trim()) newErrors.email = "E-mail é obrigatório";
+    else if (!/^\S+@\S+\.\S+$/.test(email)) newErrors.email = "E-mail inválido";
+    
+    if (!phone.trim()) newErrors.phone = "Telefone é obrigatório";
+    if (specialties.length === 0) newErrors.specialties = "Selecione pelo menos uma especialidade";
+    
+    if (!barber && !password) newErrors.password = "Senha é obrigatória para novos barbeiros";
+    else if (password && password.length < 6) newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+    
+    if (!barber && !photo && !previewUrl) newErrors.photo = "Foto é obrigatória";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+    
+    // Different data structure based on whether we're updating or creating
+    if (barber) {
+      // Update existing barber
+      const updateData: BarberFormData = {
+        name: name,
+        email: email,
+        phone: phone,
+        specialties: specialties,
+        status: status,
+      };
+      
+      if (photo) updateData.photo = photo;
+      if (password) updateData.password = password;
+      
+      onSubmit(updateData, barber.id);
+    } else {
+      // Create new barber
+      const createData: BarberFormData = {
+        name: name,
+        email: email,
+        phone: phone,
+        specialties: specialties,
+        status: status,
+        password: password,
+      };
+      
+      if (photo) createData.photo = photo;
+      
+      onSubmit(createData);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar Barbeiro" : "Novo Barbeiro"}</DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? "Atualize os dados do barbeiro conforme necessário."
-              : "Preencha os dados para adicionar um novo barbeiro."}
-          </DialogDescription>
+          <DialogTitle>
+            {barber ? "Editar Barbeiro" : "Adicionar Novo Barbeiro"}
+          </DialogTitle>
         </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            {/* Avatar preview */}
-            {isEditing && (
-              <div className="flex justify-center mb-4">
-                <Avatar className="h-24 w-24 border-2 border-primary">
-                  <AvatarImage src={barber?.photoUrl} alt={barber?.name} />
-                  <AvatarFallback className="text-lg">{getInitials(barber?.name || "")}</AvatarFallback>
-                </Avatar>
+
+        <div className="grid gap-6 py-4">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <Avatar className="w-24 h-24 border-2 border-neutral-200">
+                <AvatarImage src={previewUrl} alt={name} />
+                <AvatarFallback className="text-lg bg-navalha-burgundy text-white">
+                  {name ? name.substring(0, 2).toUpperCase() : "BB"}
+                </AvatarFallback>
+              </Avatar>
+              <Button 
+                type="button"
+                variant="outline" 
+                size="icon"
+                className="absolute bottom-0 right-0 rounded-full w-8 h-8 shadow-md"
+                onClick={() => document.getElementById('photo-upload')?.click()}
+              >
+                +
+              </Button>
+            </div>
+            <input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            {errors.photo && <span className="text-xs text-red-500">{errors.photo}</span>}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome</Label>
+              <Input 
+                id="name" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                className={errors.name ? "border-red-500" : ""}
+              />
+              {errors.name && <span className="text-xs text-red-500">{errors.name}</span>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
+                className={errors.email ? "border-red-500" : ""}
+              />
+              {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone</Label>
+              <Input 
+                id="phone" 
+                value={phone} 
+                onChange={(e) => setPhone(e.target.value)}
+                className={errors.phone ? "border-red-500" : ""}
+              />
+              {errors.phone && <span className="text-xs text-red-500">{errors.phone}</span>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha {barber && "(deixe em branco para não alterar)"}</Label>
+              <Input 
+                id="password" 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)}
+                className={errors.password ? "border-red-500" : ""}
+              />
+              {errors.password && <span className="text-xs text-red-500">{errors.password}</span>}
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="specialties">Especialidades</Label>
+              <MultiSelect
+                id="specialties"
+                options={specialtyOptions}
+                selectedValues={specialties}
+                onChange={setSpecialties}
+                className={errors.specialties ? "border-red-500" : ""}
+              />
+              {errors.specialties && <span className="text-xs text-red-500">{errors.specialties}</span>}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {specialties.map((specialty) => (
+                  <Badge key={specialty} variant="outline">
+                    {specialtyOptions.find(opt => opt.value === specialty)?.label || specialty}
+                  </Badge>
+                ))}
               </div>
-            )}
-            
-            {/* Campo: Nome */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome do barbeiro" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Campo: Email */}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>E-mail</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="email@exemplo.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Campo: Telefone */}
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Telefone</FormLabel>
-                  <FormControl>
-                    <Input placeholder="(00) 00000-0000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Campo: Especialidades */}
-            <FormField
-              control={form.control}
-              name="specialties"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Especialidades</FormLabel>
-                  <div className="grid grid-cols-2 gap-2 mt-1">
-                    {SPECIALTIES.map((specialty) => (
-                      <FormField
-                        key={specialty}
-                        control={form.control}
-                        name="specialties"
-                        render={({ field }) => (
-                          <FormItem key={specialty} className="flex flex-row items-center space-x-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(specialty)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...field.value, specialty])
-                                    : field.onChange(field.value?.filter((value) => value !== specialty));
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer text-sm">
-                              {specialty}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Campo: Status */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Status</FormLabel>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="status-active"
-                      checked={field.value === "active"}
-                      onCheckedChange={(checked) => {
-                        if (checked) field.onChange("active");
-                        else field.onChange("inactive");
-                      }}
-                    />
-                    <label
-                      htmlFor="status-active"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Ativo
-                    </label>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Campo: Senha (opcional ao editar) */}
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{isEditing ? "Nova Senha (opcional)" : "Senha"}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder={isEditing ? "Deixe em branco para manter" : "Digite a senha"}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Campo: Upload de foto (mock) */}
-            <FormItem>
-              <FormLabel>Foto (Placeholder)</FormLabel>
-              <FormControl>
-                <Input type="file" accept="image/*" disabled className="cursor-not-allowed" />
-              </FormControl>
-              <p className="text-xs text-muted-foreground">
-                Funcionalidade de upload simulada. Em um ambiente real, você poderia enviar imagens.
-              </p>
-            </FormItem>
-            
-            <DialogFooter className="pt-4">
-              <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit">
-                {isEditing ? "Atualizar" : "Adicionar"} Barbeiro
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="status" 
+                checked={status === "active"} 
+                onCheckedChange={(checked) => setStatus(checked ? "active" : "inactive")}
+              />
+              <Label htmlFor="status">Barbeiro Ativo</Label>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)} 
+            disabled={isSubmitting}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting}
+            className="bg-navalha-gold hover:bg-navalha-gold/90 text-black"
+          >
+            {isSubmitting ? "Salvando..." : barber ? "Salvar Alterações" : "Adicionar Barbeiro"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
