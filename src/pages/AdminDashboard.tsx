@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,14 +7,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar } from "@/components/ui/calendar";
-import { Eye, EyeOff, Scissors, Calendar as CalendarIcon, Users, LogOut, Store, FileText, Building, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, addMonths, subMonths, isSameDay, addDays, subDays } from "date-fns";
+import { Eye, EyeOff, Scissors, Calendar as CalendarIcon, Users, Building, FileText, Store } from "lucide-react";
+import { format } from "date-fns";
 import { BarbersFilterToggle, BarberFilterValue } from "@/components/ui/barbers-filter-toggle";
 import { useBarberFilter } from "@/hooks/use-barber-filter";
 import { useBarbers } from "@/hooks/use-barbers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { BarberCalendar } from "@/components/barbers/BarberCalendar";
+import { getBarberAppointments } from "@/data/barberAppointments";
 
 // Mock data for the dashboard
 const dailyData = [
@@ -204,11 +204,29 @@ const kpiDataByBarber = {
   }
 };
 
+// Individual barber KPI data
+const individualBarberKPIData: Record<string, any> = {
+  "1": { // João
+    services: { value: "8", trend: { value: 10, isPositive: true, label: "+10% vs ontem" }, footnote: "5 cortes / 3 barbas" },
+    billing: { value: "1.125€", trend: { value: 5, isPositive: true, label: "+5% vs mês anterior" }, footnote: "Média diária: 38€" },
+  },
+  "2": { // Maria
+    services: { value: "6", trend: { value: 5, isPositive: true, label: "+5% vs ontem" }, footnote: "4 cortes femininos / 2 penteados" },
+    billing: { value: "950€", trend: { value: 8, isPositive: true, label: "+8% vs mês anterior" }, footnote: "Média diária: 32€" },
+  },
+  "3": { // Pedro
+    services: { value: "5", trend: { value: 0, isPositive: false, label: "0% vs ontem" }, footnote: "3 cortes / 2 barbas" },
+    billing: { value: "825€", trend: { value: 3, isPositive: true, label: "+3% vs mês anterior" }, footnote: "Média diária: 28€" },
+  },
+  "4": { // Ana
+    services: { value: "4", trend: { value: 12, isPositive: true, label: "+12% vs ontem" }, footnote: "3 cortes femininos / 1 penteado" },
+    billing: { value: "750€", trend: { value: 6, isPositive: true, label: "+6% vs mês anterior" }, footnote: "Média diária: 25€" },
+  },
+};
+
 const AdminDashboard = () => {
   const [period, setPeriod] = useState("daily");
-  const [date, setDate] = useState<Date>(new Date());
-  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
-  const [showBilling, setShowBilling] = useState(false); // Changed to false (hidden by default)
+  const [showBilling, setShowBilling] = useState(false);
   const [barberFilter, setBarberFilter] = useBarberFilter("all", "dashboardBarberFilter");
   const navigate = useNavigate();
   
@@ -216,33 +234,11 @@ const AdminDashboard = () => {
   const { barbers, isLoading } = useBarbers();
   const activeBarbers = barbers.filter(barber => barber.status === "active");
 
-  // Mock current barber ID (in a real app, this would come from auth context)
-  const currentBarberId = "1";
-
-  const handleLogout = () => {
-    navigate("/barbalogin");
-  };
-  
   // Use filtered data based on barber filter selection
-  const currentAppointmentsData = appointmentsDataByBarber[barberFilter];
   const currentDailyData = dailyDataByBarber[barberFilter];
   const currentMonthlyData = monthlyDataByBarber[barberFilter];
   const currentYearlyData = yearlyDataByBarber[barberFilter];
   const currentKpiData = kpiDataByBarber[barberFilter];
-  
-  const appointmentsForSelectedDate = currentAppointmentsData.find(item => 
-    isSameDay(item.date, date)
-  )?.appointments || [];
-
-  const handlePreviousMonth = () => {
-    setCalendarMonth(prev => subMonths(prev, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCalendarMonth(prev => addMonths(prev, 1));
-  };
-
-  const daysWithAppointments = currentAppointmentsData.map(item => item.date);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -258,7 +254,7 @@ const AdminDashboard = () => {
               <BarbersFilterToggle
                 value={barberFilter}
                 onValueChange={setBarberFilter}
-                currentBarberId={currentBarberId}
+                currentBarberId="1"
                 compact={true}
               />
             }
@@ -276,7 +272,7 @@ const AdminDashboard = () => {
               <BarbersFilterToggle
                 value={barberFilter}
                 onValueChange={setBarberFilter}
-                currentBarberId={currentBarberId}
+                currentBarberId="1"
                 compact={true}
               />
             }
@@ -292,7 +288,7 @@ const AdminDashboard = () => {
               <BarbersFilterToggle
                 value={barberFilter}
                 onValueChange={setBarberFilter}
-                currentBarberId={currentBarberId}
+                currentBarberId="1"
                 compact={true}
               />
             }
@@ -363,108 +359,51 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Calendar and Appointments Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <Card className="md:col-span-1">
-            <CardHeader>
-              <div className="flex items-center justify-between mb-2">
-                <CardTitle>Calendário</CardTitle>
-                <div className="flex space-x-1">
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="h-8 w-8 p-0"
-                    onClick={handlePreviousMonth}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="h-8 w-8 p-0"
-                    onClick={handleNextMonth}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              <CardDescription className="flex items-center justify-between">
-                <span>{format(calendarMonth, "MMMM yyyy")}</span>
-                <BarbersFilterToggle
-                  value={barberFilter}
-                  onValueChange={setBarberFilter}
-                  currentBarberId={currentBarberId}
-                  compact={true}
-                />
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(newDate) => newDate && setDate(newDate)}
-                month={calendarMonth}
-                className="p-3 pointer-events-auto"
-                modifiers={{
-                  hasAppointment: daysWithAppointments
-                }}
-                modifiersClassNames={{
-                  hasAppointment: "rdp-day_hasAppointment"
-                }}
-              />
-            </CardContent>
-          </Card>
+        {/* Individual Barber Calendars */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-6">Calendários e Agendamentos por Barbeiro</h2>
           
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Agendamentos: {format(date, "dd/MM/yyyy")}</CardTitle>
-                  <CardDescription>
-                    {appointmentsForSelectedDate.length > 0 
-                      ? `${appointmentsForSelectedDate.length} serviços agendados neste dia` 
-                      : "Sem agendamentos para este dia"}
-                  </CardDescription>
+          {isLoading ? (
+            <div className="w-full text-center py-4">Carregando calendários...</div>
+          ) : activeBarbers.length > 0 ? (
+            activeBarbers.map((barber) => (
+              <div key={barber.id} className="mb-8">
+                <h3 className="text-xl font-semibold mb-4 flex items-center">
+                  <Avatar className="h-8 w-8 mr-2">
+                    <AvatarImage src={barber.photoUrl} alt={barber.name} />
+                    <AvatarFallback>{barber.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  {barber.name}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  <KpiCard
+                    title="Serviços Hoje"
+                    value={individualBarberKPIData[barber.id]?.services.value || "0"}
+                    trend={individualBarberKPIData[barber.id]?.services.trend}
+                    footnote={individualBarberKPIData[barber.id]?.services.footnote}
+                    sparklineData={servicesSparklineDataByBarber.self}
+                  />
+                  <KpiCard
+                    title="Faturação Mensal"
+                    value={individualBarberKPIData[barber.id]?.billing.value || "0€"}
+                    trend={individualBarberKPIData[barber.id]?.billing.trend}
+                    footnote={individualBarberKPIData[barber.id]?.billing.footnote}
+                    sparklineData={billingSparklineDataByBarber.self}
+                    isPrivate={!showBilling}
+                    onToggleVisibility={() => setShowBilling(!showBilling)}
+                  />
                 </div>
-                <BarbersFilterToggle
-                  value={barberFilter}
-                  onValueChange={setBarberFilter}
-                  currentBarberId={currentBarberId}
-                  compact={true}
+                <BarberCalendar 
+                  barber={barber}
+                  appointments={getBarberAppointments(barber.id)}
                 />
               </div>
-            </CardHeader>
-            <CardContent>
-              {appointmentsForSelectedDate.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Hora</TableHead>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Serviço</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {appointmentsForSelectedDate.map((appointment, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{appointment.hora}</TableCell>
-                        <TableCell>{appointment.cliente}</TableCell>
-                        <TableCell>{appointment.servico}</TableCell>
-                        <TableCell className="text-right">{appointment.valor}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <CalendarIcon className="h-12 w-12 text-gray-300 mb-2" />
-                  <p className="text-gray-500">Não há agendamentos para mostrar neste dia</p>
-                  <p className="text-gray-400 text-sm">Selecione outra data no calendário</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            ))
+          ) : (
+            <div className="w-full text-center py-4">
+              Não há barbeiros ativos. <Button variant="link" onClick={() => navigate('/admin/barbeiros')}>Adicionar barbeiros</Button>
+            </div>
+          )}
         </div>
 
         {/* Admin Navigation Cards */}
@@ -518,7 +457,7 @@ const AdminDashboard = () => {
             <BarbersFilterToggle
               value={barberFilter}
               onValueChange={setBarberFilter}
-              currentBarberId={currentBarberId}
+              currentBarberId="1"
               compact={false}
             />
           </div>
@@ -636,7 +575,7 @@ const AdminDashboard = () => {
               <BarbersFilterToggle
                 value={barberFilter}
                 onValueChange={setBarberFilter}
-                currentBarberId={currentBarberId}
+                currentBarberId="1"
                 compact={true}
               />
             </div>

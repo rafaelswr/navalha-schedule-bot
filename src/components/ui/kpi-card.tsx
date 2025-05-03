@@ -21,6 +21,7 @@ interface KpiCardProps {
   className?: string;
   isPrivate?: boolean;
   onToggleVisibility?: () => void;
+  rightElement?: React.ReactNode;
 }
 
 /**
@@ -41,22 +42,26 @@ export const KpiCard = ({
   className,
   isPrivate = false,
   onToggleVisibility,
+  rightElement,
 }: KpiCardProps) => {
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
           <span>{title}</span>
-          {onToggleVisibility && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-5 w-5 rounded-full"
-              onClick={onToggleVisibility}
-            >
-              {isPrivate ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {rightElement}
+            {onToggleVisibility && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-5 w-5 rounded-full"
+                onClick={onToggleVisibility}
+              >
+                {isPrivate ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            )}
+          </div>
         </CardTitle>
         <div className="flex items-baseline justify-between">
           <CardDescription className="text-3xl font-bold">
