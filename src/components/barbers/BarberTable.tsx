@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Table,
@@ -32,8 +31,8 @@ interface BarberTableProps {
   barbers: Barber[];
   onEdit: (barber: Barber) => void;
   onDelete: (barber: Barber) => void;
-  onToggleStatus: (barber: Barber, newStatus: "active" | "inactive") => void;
-  loading?: boolean;
+  onStatusChange: (barber: Barber, newStatus: "active" | "inactive") => void;
+  isLoading?: boolean;
   filteredByCurrentUser?: boolean;
 }
 
@@ -43,8 +42,8 @@ export function BarberTable({
   barbers,
   onEdit,
   onDelete,
-  onToggleStatus,
-  loading = false,
+  onStatusChange,
+  isLoading = false,
   filteredByCurrentUser = false,
 }: BarberTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,7 +110,7 @@ export function BarberTable({
         <Switch
           checked={barber.status === "active"}
           onCheckedChange={(checked) =>
-            onToggleStatus(barber, checked ? "active" : "inactive")
+            onStatusChange(barber, checked ? "active" : "inactive")
           }
         />
       </div>
@@ -170,7 +169,7 @@ export function BarberTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {loading ? (
+          {isLoading ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8">
                 <div className="flex flex-col items-center justify-center">
@@ -239,7 +238,7 @@ export function BarberTable({
                     <Switch
                       checked={barber.status === "active"}
                       onCheckedChange={(checked) =>
-                        onToggleStatus(barber, checked ? "active" : "inactive")
+                        onStatusChange(barber, checked ? "active" : "inactive")
                       }
                       aria-label={`Marcar como ${
                         barber.status === "active" ? "inativo" : "ativo"
@@ -322,7 +321,7 @@ export function BarberTable({
 
       {/* Mobile Cards */}
       <div className="md:hidden">
-        {loading ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-navalha-gold"></div>
             <span className="mt-2">Carregando barbeiros...</span>

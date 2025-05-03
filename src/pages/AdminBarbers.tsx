@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBarberFilter } from "@/hooks/use-barber-filter";
@@ -74,8 +73,8 @@ export default function AdminBarbers() {
     }
   };
 
-  const handleStatusChange = (id: string, status: "active" | "inactive") => {
-    updateBarberStatus.mutate({ id, status });
+  const handleStatusChange = (barber: Barber, status: "active" | "inactive") => {
+    updateBarberStatus.mutate({ id: barber.id, status });
   };
 
   const handleLogout = () => {
@@ -188,6 +187,7 @@ export default function AdminBarbers() {
               onDelete={handleDeleteBarber}
               onStatusChange={handleStatusChange}
               isLoading={isLoading}
+              filteredByCurrentUser={barberFilter === "self"}
             />
           </div>
         </main>
