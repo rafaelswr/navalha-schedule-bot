@@ -1,6 +1,6 @@
 
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { LayoutDashboard, Scissors, Package, Users, Building } from "lucide-react";
 import {
   Menubar,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/menubar";
 
 interface AdminLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
@@ -90,7 +90,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
       <main className="flex-1 overflow-auto p-6">
         <div className="container mx-auto max-w-8xl">
-          {children}
+          {children || <Outlet />}
         </div>
       </main>
     </div>
