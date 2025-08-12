@@ -8,33 +8,30 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-navalha-black text-white py-4 px-6 sticky top-0 z-50 shadow-md">
+    <header className="bg-background text-foreground border-b py-4 px-6 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <span className="text-navalha-gold font-bold text-2xl">Clube da Navalha</span>
+            <span className="text-foreground font-bold text-2xl">Clube da Navalha</span>
           </Link>
         </div>
 
         {/* Menu Desktop */}
         <nav className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="hover:text-navalha-gold transition-colors">
+          <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
             Início
           </Link>
-          <Link to="/servicos" className="hover:text-navalha-gold transition-colors">
+          <Link to="/servicos" className="text-muted-foreground hover:text-foreground transition-colors">
             Serviços
           </Link>
-          <Link to="/loja" className="hover:text-navalha-gold transition-colors">
-            Loja
-          </Link>
-          <Link to="/agendamento" className="hover:text-navalha-gold transition-colors">
+          <Link to="/agendamento" className="text-muted-foreground hover:text-foreground transition-colors">
             Agendamento
           </Link>
-          <Link to="/admin/login" className="hover:text-navalha-gold transition-colors flex items-center gap-1">
+          <Link to="/admin/login" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
             <UserRound size={18} />
             Login
           </Link>
-          <Button className="bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white transition-colors" asChild>
+          <Button asChild>
             <Link to="/agendamento">Marcar Agora</Link>
           </Button>
         </nav>
@@ -43,7 +40,7 @@ export const Navbar = () => {
         <Button 
           variant="ghost" 
           size="icon"
-          className="md:hidden text-white"
+          className="md:hidden text-foreground"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           <Menu size={24} />
@@ -52,48 +49,38 @@ export const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <nav className="md:hidden bg-navalha-gray mt-2 py-4">
+        <nav className="md:hidden bg-background border-t mt-2 py-4">
           <div className="container mx-auto flex flex-col space-y-4 px-6">
             <Link 
               to="/" 
-              className="hover:text-navalha-gold transition-colors py-2"
+              className="text-muted-foreground hover:text-foreground transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Início
             </Link>
             <Link 
               to="/servicos" 
-              className="hover:text-navalha-gold transition-colors py-2"
+              className="text-muted-foreground hover:text-foreground transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Serviços
             </Link>
             <Link 
-              to="/loja" 
-              className="hover:text-navalha-gold transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Loja
-            </Link>
-            <Link 
               to="/agendamento" 
-              className="hover:text-navalha-gold transition-colors py-2"
+              className="text-muted-foreground hover:text-foreground transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Agendamento
             </Link>
             <Link 
               to="/admin/login" 
-              className="hover:text-navalha-gold transition-colors py-2 flex items-center gap-1"
+              className="text-muted-foreground hover:text-foreground transition-colors py-2 flex items-center gap-1"
               onClick={() => setIsMenuOpen(false)}
             >
               <UserRound size={18} />
               Login
             </Link>
-            <Button 
-              className="bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white transition-colors w-full"
-              asChild
-            >
+            <Button className="w-full" asChild>
               <Link to="/agendamento" onClick={() => setIsMenuOpen(false)}>Marcar Agora</Link>
             </Button>
           </div>

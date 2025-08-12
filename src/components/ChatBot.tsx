@@ -169,7 +169,7 @@ export const ChatBot = () => {
     <>
       {!isOpen && (
         <Button
-          className="fixed right-6 bottom-6 rounded-full w-14 h-14 flex items-center justify-center bg-navalha-gold hover:bg-navalha-burgundy shadow-lg z-40"
+          className="fixed right-6 bottom-6 rounded-full w-14 h-14 flex items-center justify-center bg-primary hover:bg-primary/90 shadow-lg z-40"
           onClick={() => setIsOpen(true)}
         >
           <MessageCircle size={24} />
@@ -178,7 +178,7 @@ export const ChatBot = () => {
 
       {isOpen && (
         <div className="fixed right-6 bottom-6 w-80 md:w-96 h-96 bg-white rounded-lg shadow-xl flex flex-col z-40 border border-gray-200">
-          <div className="bg-navalha-black text-white p-4 flex justify-between items-center rounded-t-lg">
+          <div className="bg-primary text-primary-foreground p-4 flex justify-between items-center rounded-t-lg">
             <div>
               <h3 className="font-semibold">Clube da Navalha</h3>
               <p className="text-xs text-gray-300">Assistente de Agendamento</p>
@@ -200,7 +200,7 @@ export const ChatBot = () => {
                 className={cn(
                   "mb-4 max-w-[75%] rounded-lg p-3", 
                   msg.isUser 
-                    ? "ml-auto bg-navalha-gold text-black" 
+                    ? "ml-auto bg-primary text-primary-foreground" 
                     : "bg-gray-200 text-gray-800"
                 )}
               >
@@ -228,10 +228,9 @@ export const ChatBot = () => {
                 }
               }}
             />
-            <Button 
-              className="bg-navalha-gold hover:bg-navalha-burgundy text-black hover:text-white"
-              onClick={handleSendMessage}
-            >
+              <Button 
+                onClick={handleSendMessage}
+              >
               Enviar
             </Button>
           </div>

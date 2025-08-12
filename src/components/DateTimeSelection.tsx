@@ -106,7 +106,7 @@ export const DateTimeSelection = ({
                     variant={selectedTime === time ? "default" : "outline"}
                     className={cn(
                       "text-center py-2 h-auto",
-                      selectedTime === time && "bg-navalha-gold text-black hover:bg-navalha-gold/90"
+                      selectedTime === time && "bg-primary text-primary-foreground hover:bg-primary/90"
                     )}
                     onClick={() => onTimeChange(time)}
                   >

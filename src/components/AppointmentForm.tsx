@@ -126,9 +126,9 @@ export const AppointmentForm = () => {
 
   return (
     <Card className="w-full max-w-4xl mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
-      <div className="bg-navalha-black text-white px-6 py-4">
+      <div className="bg-background text-foreground px-6 py-4 border-b">
         <h2 className="text-2xl font-serif">Marcar Agendamento</h2>
-        <p className="text-gray-300 text-sm">
+        <p className="text-muted-foreground text-sm">
           Reserva o teu horário para um corte ou tratamento de barba
         </p>
       </div>
@@ -221,22 +221,21 @@ export const AppointmentForm = () => {
 
                   <div className="flex flex-col md:flex-row gap-3 pt-4">
                     <Button 
-                      type="submit" 
-                      className="bg-green-500 hover:bg-green-600 text-white"
+                      type="submit"
                     >
                       <Check className="mr-2 h-4 w-4" /> Confirmar
                     </Button>
                     <Button 
                       type="button" 
                       onClick={handleBack}
-                      className="bg-amber-400 hover:bg-amber-500 text-black"
+                      variant="outline"
                     >
                       <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
                     </Button>
                     <Button 
                       type="button" 
                       onClick={handleCancel}
-                      className="bg-red-500 hover:bg-red-600 text-white"
+                      variant="destructive"
                     >
                       <X className="mr-2 h-4 w-4" /> Cancelar
                     </Button>

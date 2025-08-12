@@ -48,8 +48,8 @@ export const MultiStepProgress = ({
             className={`flex-1 h-1 ${
               index < steps.length - 1
                 ? index < currentStep - 1
-                  ? "bg-navalha-gold"
-                  : "bg-gray-200"
+                  ? "bg-primary"
+                  : "bg-muted"
                 : "bg-transparent"
             }`}
           />

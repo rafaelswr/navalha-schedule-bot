@@ -46,7 +46,7 @@ export const ServiceSelection = ({
                   <h4 className="font-semibold">{service.name}</h4>
                   <p className="text-sm text-gray-500">{service.duration}</p>
                 </div>
-                <div className="text-lg font-bold text-navalha-burgundy">
+                <div className="text-lg font-bold text-foreground">
                   {service.price}
                 </div>
               </div>

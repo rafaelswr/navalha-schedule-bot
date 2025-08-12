@@ -53,9 +53,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-gray-50 text-lg leading-relaxed">
-      <header className="w-full bg-navalha-black text-white py-2 px-4 shadow-md">
+      <header className="w-full bg-background text-foreground border-b py-2 px-4 shadow-sm">
         <div className="container mx-auto max-w-8xl flex items-center justify-between">
-          <div className="text-navalha-gold font-bold text-xl">
+          <div className="text-foreground font-bold text-xl">
             Clube da Navalha
           </div>
           
